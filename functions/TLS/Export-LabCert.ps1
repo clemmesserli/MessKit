@@ -41,10 +41,8 @@ Function Export-LabCert {
   Process {
 
     if ($PSBoundParameters.ContainsKey('PassPhrase')) {
-      # Since a SecureString was passed in, we will now have to revert it to plaintext in order to save in file
-      $PasswordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($PassPhrase)
-      $PlainTextPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto($PasswordPointer)
-      [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($PasswordPointer)
+      # Since a SecureString was passed in, we will use a helper function to convert into plaintext in order to save in file
+      $PlainTextPassword = Convert-SecureStringToText -SecureString $PassPhrase
     } else {
       # Generate a pseudo-random password using the 'New-Password' function
       $PlainTextPassword = New-Password -PwdLength 18
