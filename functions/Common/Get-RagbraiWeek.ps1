@@ -9,6 +9,9 @@
 	.EXAMPLE
 		Get-RagbraiWeek -year 2024
 		Returns Ragbrai Week for a custom year.
+	.EXAMPLE
+		(Get-RagbraiWeek -Year 2024) -replace('-.* ', ', ') | Get-CountDown
+		Returns how many hours/days/minutes until the start of Ragbrai 2024
 	#>
 	[CmdletBinding()]
 	Param (
