@@ -13,8 +13,9 @@ Function Convert-StringToHash {
 		$string2 = Convert-StringToHash 'the quick brown fox.'
 		Compare-Object $string1.hash $string2.hash
 	.EXAMPLE
-		(Get-Content ./private/names.txt) | Foreach-Object { ConvertTo-TitleCase -String $_ }
-		Accepts a file with list of users or books and will convert each row
+		$string1 = Convert-StringToHash 'The Quick Brown Fox.'
+		$string2 = Convert-StringToHash 'The Quick Brown Fox.'
+		Compare-Object $string1.hash $string2.hash -IncludeEqual
 	.LINK
 		https://community.idera.com/database-tools/powershell/powertips/b/tips/posts/creating-hashes-from-text
 	#>
