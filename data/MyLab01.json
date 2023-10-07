@@ -1,0 +1,39 @@
+{
+  "RootCA": {
+    "CertType": "Root",
+    "CertStore": "CurrentUser",
+    "SubjectName": "MyRootCA",
+    "Days": 365
+  },
+  "IntermediateCA": {
+    "CertType": "Intermediate",
+    "CertStore": "CurrentUser",
+    "SubjectName": "MyIntermediateCA",
+    "Days": 365
+  },
+  "ComputerName": [],
+  "Web": {
+    "CertType": "Web",
+    "CertStore": "CurrentUser",
+    "SubjectName": ["demo1.mylab.com"],
+    "Days": 365
+  },
+  "DocumentEncryption": {
+    "CertType": "DocumentEncryption",
+    "CertStore": "CurrentUser",
+    "SubjectName": "MyCryptoCert",
+    "Days": 365
+  },
+  "CodeSignining": {
+    "CertType": "CodeSigning",
+    "CertStore": "CurrentUser",
+    "SubjectName": ["MyCryptoCert"],
+    "Days": 365
+  },
+  "ClientAuth": {
+    "CertType": "ClientAuth",
+    "CertStore": "CurrentUser",
+    "SubjectName": ["Demo1, HelpDeskUser", "Demo1, WebAdminUser"],
+    "Days": 30
+  }
+}

@@ -1,0 +1,46 @@
+{
+	"RootCA": {
+		"CertType": "Root",
+		"CertStore": "LocalMachine",
+		"SubjectName": "MyRootCA01",
+		"Days": 365
+	},
+	"IntermediateCA": {
+		"CertType": "Intermediate",
+		"CertStore": "LocalMachine",
+		"SubjectName": "MyIntermediateCA01",
+		"Days": 365
+	},
+	"ComputerName": [],
+	"Web": {
+		"CertStore": "LocalMachine",
+		"SubjectName": [
+			"dev.lab01.com",
+			"tst.lab01.com",
+			"mdl.lab01.com",
+			"www.lab01.com"
+		],
+		"Days": 365
+	},
+	"DocumentEncryption": {
+		"CertType": "DocumentEncryption",
+		"CertStore": "LocalMachine",
+		"SubjectName": "MyDocSign01",
+		"Days": 365
+	},
+	"CodeSignining": {
+		"CertType": "CodeSigning",
+		"CertStore": "LocalMachine",
+		"SubjectName": "MyCodeSign01",
+		"Days": 365
+	},
+	"ClientAuth": {
+		"CertType": "ClientAuth",
+		"CertStore": "LocalMachine",
+		"SubjectName": [
+			"Lab01, HelpDeskUser",
+			"Lab01, WebAdminUser"
+		],
+		"Days": 30
+	}
+}
