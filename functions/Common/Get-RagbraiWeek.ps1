@@ -1,13 +1,16 @@
 ﻿Function Get-RagbraiWeek {
 	<#
 	.SYNOPSIS
-		This function will return time remaining the start and end dates for Ragbrai.
-		Ragbrai is a cycling event that occurs the last full week of July in which riders cycle across the state of Iowa.
+		This function calculates and returns the start and end dates of Ragbrai Week for a given year.
+        Ragbrai is a cycling event that takes place during the last full week of July in Iowa.
+    .PARAMETER Year
+        An integer input representing the year for which Ragbrai Week is to be calculated.
+        It defaults to the current year and must be between 2024 and 2100.
 	.EXAMPLE
 		Get-RagbraiWeek
 		Returns Ragbrai Week for the present year.
 	.EXAMPLE
-		Get-RagbraiWeek -year 2024
+		Get-RagbraiWeek -year 2025
 		Returns Ragbrai Week for a custom year.
 	.EXAMPLE
 		(Get-RagbraiWeek -Year 2024) -replace('-.* ', ', ') | Get-CountDown
@@ -15,17 +18,16 @@
 	#>
 	[CmdletBinding()]
 	Param (
+		[ValidateRange(2024, 2100)]
 		[int]$Year = (Get-Date).Year
 	)
 
-	Begin {}
-
 	Process {
-		# Ride is always the month of July so need need to ask for user input.
+		# Ride is always in July so need need to ask for user input as it will always be 7th month of the year.
 		$MonthNumber = '07'
 
 		# Find the last day of the Month as the offset to then find the duration.
-		$lastDay = New-Object DateTime($Year, $MonthNumber, [DateTime]::DaysInMonth($Year, $MonthNumber))
+		$lastDay = [datetime]::new($Year, $MonthNumber, [DateTime]::DaysInMonth($Year, $MonthNumber))
 
 		# Return the preceding Saturday of the last full work week (Mon-Fri)
 		switch ([int] $lastDay.DayOfWeek) {
@@ -37,8 +39,9 @@
 			5 { [DateTime]$ragbrai = $lastDay.AddDays(-6) }
 			6 { [DateTime]$ragbrai = $lastDay.AddDays(-7) }
 		}
-		"$((Get-Culture).DateTimeFormat.GetMonthName((Get-Date $ragbrai).Month)) $($ragbrai.ToString("dd"))-$($ragbrai.AddDays(6).ToString("dd")), $($ragbrai.ToString("yyyy"))"
-	}
 
-	End {}
+		$startDate = $ragbrai.ToString("MMMM dd")
+		$endDate = $ragbrai.AddDays(6).ToString("dd, yyyy")
+		Write-Output "$startDate-$endDate"
+	}
 }
