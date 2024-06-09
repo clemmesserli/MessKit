@@ -3,10 +3,10 @@ Function Get-LastDayInMonth {
 	.EXAMPLE
 		Get-LastDayInMonth -day Monday -month May
 	.EXAMPLE
-		(1..12) | % { Get-LastDayInMonth -day Monday -monthnumber $_ }
+		(1..12) | % { Get-LastDayInMonth -day Saturday -monthnumber $_ }
 		Get the last Saturday of the month for all 12 months for current year
 	.EXAMPLE
-		(1..12) | % { Get-LastDayInMonth -day Monday -monthnumber $_ -year 2024 }
+		(1..12) | % { Get-LastDayInMonth -day Monday -monthnumber $_ -year 2025 }
 		Get the last Saturday of the month for all 12 months for custom year
 	#>
 	[CmdletBinding()]
@@ -26,8 +26,6 @@ Function Get-LastDayInMonth {
 		[int]$Year = (Get-Date).Year
 	)
 
-	Begin {}
-
 	Process {
 		if ( $PsCmdlet.ParameterSetName -eq "Month") {
 			$MonthNumber = [array]::indexof([cultureinfo]::CurrentCulture.DateTimeFormat.MonthNames, "$Month") + 1
@@ -38,11 +36,9 @@ Function Get-LastDayInMonth {
 		$diff = ([int] [DayOfWeek]::$Day) - ([int] $lastDay.DayOfWeek)
 
 		if ($diff -ge 0) {
-			$lastDay.AddDays( - (7 - $diff)).ToString('dddd, MMMM dd, yyyy')
+			$lastDay.AddDays( - (7 - $diff)).ToString("dddd, MMMM dd, yyyy")
 		} else {
-			$lastDay.AddDays($diff).ToString('dddd, MMMM dd, yyyy')
+			$lastDay.AddDays($diff).ToString("dddd, MMMM dd, yyyy")
 		}
 	}
-
-	End {}
 }

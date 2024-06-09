@@ -1,13 +1,15 @@
 Function Get-DayInMonth {
 	<#
 	.EXAMPLE
-		Get-DayInMonth -weeknumber 2 -day Tuesday -month April
+		Get-DayInMonth -weeknumber 1 -day Monday -month September
+		Description: Labor Day
+	.EXAMPLE
+		Get-DayInMonth -weeknumber 4 -day Thursday -month November
+		Description: Thanksgiving
 	.EXAMPLE
 		(1..12) | Foreach-Object { Get-DayInMonth -weeknumber 2 -day Tuesday -monthnumber $_ }
-		Get every 2nd Tuesday of 12 months for current year
-	.EXAMPLE
-		(1..12) | Foreach-Object { Get-DayInMonth -weeknumber 2 -day Tuesday -monthnumber $_ -year 2024 }
-		Get every 2nd Tuesday of 12 months for custom year
+		Description: Get every 2nd Tuesday of 12 months for current year
+
 	#>
 	[CmdletBinding()]
 	Param (
@@ -30,11 +32,9 @@ Function Get-DayInMonth {
 		[int]$Year = (Get-Date).Year
 	)
 
-	Begin {}
-
 	Process {
 		if ( $PsCmdlet.ParameterSetName -eq "Month") {
-			$MonthNumber = [array]::indexof([cultureinfo]::CurrentCulture.DateTimeFormat.MonthNames, "$Month") + 1
+			$MonthNumber = [Array]::IndexOf([CultureInfo]::CurrentCulture.DateTimeFormat.MonthNames, $Month) + 1
 		}
 		$Date = Get-Date -Month $MonthNumber -Year $Year
 
@@ -42,11 +42,9 @@ Function Get-DayInMonth {
 
 		[int]$Shift = $Day + 7 * $WeekNumber - $FirstDay.DayOfWeek
 
-		If ($FirstDay.DayOfWeek -le $Day) {
+		if ($FirstDay.DayOfWeek -le $Day) {
 			$Shift -= 7
 		}
-		$FirstDay.AddDays($Shift).ToString('dddd, MMMM dd, yyyy')
+		$FirstDay.AddDays($Shift).ToString("dddd, MMMM dd, yyyy")
 	}
-
-	End {}
 }

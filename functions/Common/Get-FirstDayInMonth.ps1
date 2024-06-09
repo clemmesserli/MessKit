@@ -2,12 +2,12 @@ Function Get-FirstDayInMonth {
 	<#
 	.EXAMPLE
 		Get-FirstDayInMonth -day Monday -month September
-		Returns date for Memorial Day of current year
+		Returns date for Labor Day of current year
 	.EXAMPLE
 		(1..12) | % { Get-FirstDayInMonth -day Saturday -monthnumber $_ }
 		Get the first Saturday of the month for all 12 months for current year
 	.EXAMPLE
-		(1..12) | % { Get-FirstDayInMonth -day Saturday -monthnumber $_ -year 2024 }
+		(1..12) | % { Get-FirstDayInMonth -day Saturday -monthnumber $_ -year 2025 }
 		Get the first Saturday of the month for all 12 months for custom year
 	#>
 	[CmdletBinding()]
@@ -27,8 +27,6 @@ Function Get-FirstDayInMonth {
 		[int]$Year = (Get-Date).Year
 	)
 
-	Begin {}
-
 	Process {
 		if ( $PsCmdlet.ParameterSetName -eq "Month") {
 			$MonthNumber = [array]::indexof([cultureinfo]::CurrentCulture.DateTimeFormat.MonthNames, "$Month") + 1
@@ -42,8 +40,6 @@ Function Get-FirstDayInMonth {
 		If ($FirstDay.DayOfWeek -le $Day) {
 			$Shift -= 7
 		}
-		$FirstDay.AddDays($Shift).ToString('dddd, MMMM dd, yyyy')
+		$FirstDay.AddDays($Shift).ToString("dddd, MMMM dd, yyyy")
 	}
-
-	End {}
 }
