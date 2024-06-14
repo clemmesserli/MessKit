@@ -1,22 +1,18 @@
 Function ConvertTo-Base64 {
 	<#
-    .SYNOPSIS
-    Converts a string to its Base64 encoded representation.
-
-    .DESCRIPTION
-    This function takes a string as input and Base64 encodes it using the specified encoding.
-	The default encoding is UTF8.
-
-    .PARAMETER String
-    The string to be encoded (mandatory).
-
-    .PARAMETER encoding
-    The text encoding to use (optional, defaults to "UTF8").
-    Supported values: Ascii, BigEndianUnicode, BigEndianUTF32, Byte, Unicode, UTF32, UTF7, UTF8
-
-    .EXAMPLE
-    "Hello World" | ConvertTo-Base64
-    # Output: SGVsbG8gV29ybGQ=
+		.SYNOPSIS
+		Converts a string to its Base64 encoded representation.
+		.DESCRIPTION
+		This function takes a string as input and Base64 encodes it using the specified encoding.
+		The default encoding is UTF8.
+		.PARAMETER String
+		The string to be encoded (mandatory).
+		.PARAMETER encoding
+		The text encoding to use (optional, defaults to "UTF8").
+		Supported values: Ascii, BigEndianUnicode, BigEndianUTF32, Byte, Unicode, UTF32, UTF7, UTF8
+		.EXAMPLE
+		"Hello World" | ConvertTo-Base64
+		# Output: SGVsbG8gV29ybGQ=
     #>
 	[CmdletBinding()]
 	Param (
