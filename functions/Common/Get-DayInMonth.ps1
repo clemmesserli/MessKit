@@ -37,6 +37,9 @@ Function Get-DayInMonth {
 		.EXAMPLE
 		(1..12) | Foreach-Object { Get-DayInMonth -weeknumber 2 -day Tuesday -monthnumber $_ }
 		Description: Get every 2nd Tuesday of 12 months for the current year
+
+		.NOTES
+		Enhanced by ChatGPT-4o
 	#>
 	[CmdletBinding()]
 	Param (
