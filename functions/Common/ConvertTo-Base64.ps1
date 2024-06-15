@@ -21,7 +21,7 @@ Function ConvertTo-Base64 {
 
 		[Parameter(ValueFromPipelineByPropertyName)]
 		[ValidateSet("Ascii", "BigEndianUnicode", "BigEndianUTF32", "Byte", "Unicode", "UTF32", "UTF7", "UTF8")]
-		[String]$encoding = "UTF8"
+		[string]$encoding = "UTF8"
 	)
 
 	Process {

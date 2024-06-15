@@ -22,7 +22,7 @@ Function ConvertTo-TitleCase {
 	Param (
 		[Parameter(Mandatory, ValueFromPipeline)]
 		[AllowEmptyString()]
-		[String[]]$String
+		[string[]]$String
 	)
 
 	Process {

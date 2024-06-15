@@ -17,7 +17,7 @@ Function ConvertTo-Geocode {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory, ValueFromPipeline)]
-		[String[]]$AddressList
+		[string[]]$AddressList
 	)
 
 	Process {

@@ -21,11 +21,11 @@ Function ConvertFrom-Base64 {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-		[String]$Base64String,
+		[string]$Base64String,
 
 		[Parameter(ValueFromPipelineByPropertyName)]
 		[ValidateSet("Ascii", "BigEndianUnicode", "BigEndianUTF32", "Byte", "Unicode", "UTF32", "UTF7", "UTF8")]
-		[String]$Encoding = "UTF8"
+		[string]$Encoding = "UTF8"
 	)
 
 	Process {
