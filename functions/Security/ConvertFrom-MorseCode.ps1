@@ -1,96 +1,62 @@
 ﻿Function ConvertFrom-MorseCode {
 	<#
-    .SYNOPSIS
-        Create plain text from morse code.
-    .EXAMPLE
-        ConvertFrom-MorseCode -String '-.-. .- .-.. .-.. / ----. .---- .---- -.-.--'
-	.EXAMPLE
+		.SYNOPSIS
+		Create plain text from morse code.
+
+		.DESCRIPTION
+		This script/function converts input strings to Morse Code.
+		It utilizes a dictionary mapping Morse Code symbols to characters for decoding.
+
+		.EXAMPLE
+		ConvertFrom-MorseCode -String '-.-. .- .-.. .-.. / ----. .---- .---- -.-.--'
+
+		.EXAMPLE
 		ConvertFrom-MorseCode -String '.- -... -.-. .---- ..--- ...-- .--.-. .--. ----- .-- . .-. ... .... ...-- .-.. .-.. .-.-.- .-. ----- -.-. -.- ... -.-.--'
-    .EXAMPLE
-        ConvertFrom-MorseCode -String '.--. ----- .-- . .-. ... .... ...-- .-.. .-.. / .-. ----- -.-. -.- ... -.-.--' | Set-Clipboard
-	.EXAMPLE
-		ConvertFrom-MorseCode -String (Get-Content C:\Scripts\MorseCode.txt) | Out-File C:\Scripts\PlainText2.txt
+
+		.EXAMPLE
+		ConvertFrom-MorseCode -String '.--. ----- .-- . .-. ... .... ...-- .-.. .-.. / .-. ----- -.-. -.- ... -.-.--' | Set-Clipboard
+
+		.EXAMPLE
+		ConvertFrom-MorseCode -String (Get-Content ./private/MorseCode.txt) | Out-File ./private/MorsePlain.txt
+
+		.NOTES
+		Enhanced by Codiumate
     #>
 	[CmdletBinding()]
 	param(
-		[Parameter(Mandatory)]
-		[String[]]$String
+		[Parameter(Mandatory, ValueFromPipeline)]
+		[AllowEmptyString()]
+		[string[]]$String
 	)
 
-	$data = @()
-	ForEach ($s In $String) {
-		$line = @()
-		foreach ($char in $s.Split(' ')) {
-			switch ($char) {
-				#region Upper-Case Letters
-				".-" { $letter = "A" }
-				"-..." { $letter = "B" }
-				"-.-." { $letter = "C" }
-				"-.." { $letter = "D" }
-				"." { $letter = "E" }
-				"..-." { $letter = "F" }
-				"--." { $letter = "G" }
-				"...." { $letter = "H" }
-				".." { $letter = "I" }
-				".---" { $letter = "J" }
-				"-.-" { $letter = "K" }
-				".-.." { $letter = "L" }
-				"--" { $letter = "M" }
-				"-." { $letter = "N" }
-				"---" { $letter = "O" }
-				".--." { $letter = "P" }
-				"--.-" { $letter = "Q" }
-				".-." { $letter = "R" }
-				"..." { $letter = "S" }
-				"-" { $letter = "T" }
-				"..-" { $letter = "U" }
-				"...-" { $letter = "V" }
-				".--" { $letter = "W" }
-				"-..-" { $letter = "X" }
-				"-.--" { $letter = "Y" }
-				"--.." { $letter = "Z" }
-				#endregion Upper-Case Letters
+	process {
+		$morseToLetter = @{
+			# Upper-Case Letters
+			".-" = "A"; "-..." = "B"; "-.-." = "C"; "-.." = "D"; "." = "E"
+			"..-." = "F"; "--." = "G"; "...." = "H"; ".." = "I"; ".---" = "J"
+			"-.-" = "K"; ".-.." = "L"; "--" = "M"; "-." = "N"; "---" = "O"
+			".--." = "P"; "--.-" = "Q"; ".-." = "R"; "..." = "S"; "-" = "T"
+			"..-" = "U"; "...-" = "V"; ".--" = "W"; "-..-" = "X"; "-.--" = "Y"
+			"--.." = "Z"
 
-				#region Numbers
-				"-----" { $letter = "0" }
-				".----" { $letter = "1" }
-				"..---" { $letter = "2" }
-				"...--" { $letter = "3" }
-				"....-" { $letter = "4" }
-				"....." { $letter = "5" }
-				"-...." { $letter = "6" }
-				"--..." { $letter = "7" }
-				"---.." { $letter = "8" }
-				"----." { $letter = "9" }
-				#endregion Numbers
+			# Numbers
+			"-----" = "0"; ".----" = "1"; "..---" = "2"; "...--" = "3"; "....-" = "4"
+			"....." = "5"; "-...." = "6"; "--..." = "7"; "---.." = "8"; "----." = "9"
 
-				#region Symbols
-				"-.-.--" { $letter = "!" }
-				".--.-." { $letter = "@" }
-				"...-..-" { $letter = "`$" }
-				".-..." { $letter = "&" }
-				"-...-" { $letter = "=" }
-				".-.-." { $letter = "+" }
-				"-....-" { $letter = "-" }
-				"-..-." { $letter = "/" }
-				".-.-.-" { $letter = "." }
-				"--..--" { $letter = "," }
-				"-.-.-." { $letter = ";" }
-				"---..." { $letter = ":" }
-				"..--.-" { $letter = "_" }
-				"-.--." { $letter = "(" }
-				"-.--.-" { $letter = ")" }
-				".----." { $letter = "`'" }
-				".-..-." { $letter = "`"" }
-				"..--.." { $letter = "?" }
-				"..-.-" { $letter = "¿" }
-				"--...-" { $letter = "¡" }
-				"/" { $letter = " " }
-				#endregion Symbols
-			}
-			$line += $letter
+			# Symbols
+			"-.-.--" = "!"; ".--.-." = "@"; ".-..." = "&"; "-...-" = "="
+			".-.-." = "+"; "-....-" = "-"; "-..-." = "/"; ".-.-.-" = "."
+			"--..--" = ","; "---..." = ":"; "-.--." = "("; "-.--.-" = ")"
+			".----." = "`'"; ".-..-." = "`""; "..--.." = "?"; "/" = " "
 		}
-		$data += $line -join ('')
+
+		$stringBuilder = [System.Text.StringBuilder]::new()
+		foreach ($s in $String) {
+			foreach ($char in $s.Split(' ')) {
+				$letter = $morseToLetter[$char]
+				[void]$stringBuilder.Append($letter)
+			}
+			$stringBuilder.ToString()
+		}
 	}
-	$data -join (' ')
 }

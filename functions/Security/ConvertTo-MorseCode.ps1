@@ -1,96 +1,89 @@
 ﻿Function ConvertTo-MorseCode {
 	<#
-    .SYNOPSIS
-        Create Morse Code from input string.
-    .EXAMPLE
-        ConvertTo-MorseCode -String 'SOS'
-    .EXAMPLE
-        ConvertTo-MorseCode -String 'Call (123) 456-7689 - I Have Fallen and Cannot Get Up.'
-    .EXAMPLE
-        ConvertTo-MorseCode -String 'abc123@p0wersh3ll.r0cks!' | Set-Clipboard
-	.EXAMPLE
-		ConvertTo-MorseCode -String (Get-Content C:\Scripts\PlainText.txt) | Out-File C:\Scripts\MorseCode.txt
+		.SYNOPSIS
+		Converts input string to Morse Code and optionally plays it as audio.
+
+		.DESCRIPTION
+		This script/function converts input strings to Morse Code and optionally plays it as audio.
+		It utilizes a dictionary mapping characters to Morse Code symbols for encoding.
+
+		.EXAMPLE
+		ConvertTo-MorseCode -String 'SOS'
+
+		.EXAMPLE
+		ConvertTo-MorseCode -String 'Call (123) 456-7689 - I Have Fallen and Cannot Get Up.' -audio
+
+		.EXAMPLE
+		ConvertTo-MorseCode -String 'abc123@p0wersh3ll.r0cks!' | Set-Clipboard
+
+		.EXAMPLE
+		ConvertTo-MorseCode -String (Get-Content ./private/MorsePlain.txt) | Out-File ./private/MorseCode.txt
+
+		.EXAMPLE
+		'abc123@p0wersh3ll.r0cks!' | ConvertTo-MorseCode -audio
+
+		.NOTES
+		Enhanced by Codiumate
     #>
 	[CmdletBinding()]
 	param(
-		[Parameter(Mandatory)]
-		[String[]]$String
+		[Parameter(Mandatory, ValueFromPipeline)]
+		[AllowEmptyString()]
+		[string[]]$String,
+
+		[Parameter()]
+		[switch]$audio
 	)
 
-	$data = @()
-	ForEach ($s In $String) {
+	process {
+		$letterToMorse = @{
+			# Upper-Case Letters
+			"A" = ".-"; "B" = "-..."; "C" = "-.-."; "D" = "-.."; "E" = "."
+			"F" = "..-."; "G" = "--."; "H" = "...."; "I" = ".."; "J" = ".---"
+			"K" = "-.-"; "L" = ".-.."; "M" = "--"; "N" = "-."; "O" = "---"
+			"P" = ".--."; "Q" = "--.-"; "R" = ".-."; "S" = "..."; "T" = "-"
+			"U" = "..-"; "V" = "...-"; "W" = ".--"; "X" = "-..-"; "Y" = "-.--"
+			"Z" = "--.."
+
+			# Numbers
+			"0" = "-----"; "1" = ".----"; "2" = "..---"; "3" = "...--"; "4" = "....-"
+			"5" = "....."; "6" = "-...."; "7" = "--..."; "8" = "---.."; "9" = "----."
+
+			# Symbols
+			"!" = "-.-.--"; "@" = ".--.-."; "&" = ".-..."; "=" = "-...-"
+			"+" = ".-.-."; "-" = "-....-"; "/" = "-..-."; "." = ".-.-.-"
+			"," = "--..--"; ":" = "---..."; "(" = "-.--."; ")" = "-.--.-"
+			"`'" = ".----."; "`"" = ".-..-."; "?" = "..--.."; " " = "/"
+		}
+
+		$data = @()
 		$line = @()
-		foreach ($char in $s.ToUpper().ToCharArray()) {
-			switch ($char) {
-				#region Upper-Case Letters
-				"A" { $letter = ".-" }
-				"B" { $letter = "-..." }
-				"C" { $letter = "-.-." }
-				"D" { $letter = "-.." }
-				"E" { $letter = "." }
-				"F" { $letter = "..-." }
-				"G" { $letter = "--." }
-				"H" { $letter = "...." }
-				"I" { $letter = ".." }
-				"J" { $letter = ".---" }
-				"K" { $letter = "-.-" }
-				"L" { $letter = ".-.." }
-				"M" { $letter = "--" }
-				"N" { $letter = "-." }
-				"O" { $letter = "---" }
-				"P" { $letter = ".--." }
-				"Q" { $letter = "--.-" }
-				"R" { $letter = ".-." }
-				"S" { $letter = "..." }
-				"T" { $letter = "-" }
-				"U" { $letter = "..-" }
-				"V" { $letter = "...-" }
-				"W" { $letter = ".--" }
-				"X" { $letter = "-..-" }
-				"Y" { $letter = "-.--" }
-				"Z" { $letter = "--.." }
-				#endregion Upper-Case Letters
-
-				#region Numbers
-				"0" { $letter = "-----" }
-				"1" { $letter = ".----" }
-				"2" { $letter = "..---" }
-				"3" { $letter = "...--" }
-				"4" { $letter = "....-" }
-				"5" { $letter = "....." }
-				"6" { $letter = "-...." }
-				"7" { $letter = "--..." }
-				"8" { $letter = "---.." }
-				"9" { $letter = "----." }
-				#endregion Numbers
-
-				#region Symbols
-				"!" { $letter = "-.-.--" }
-				"@" { $letter = ".--.-." }
-				"`$" { $letter = "...-..-" }
-				"&" { $letter = ".-..." }
-				"=" { $letter = "-...-" }
-				"+" { $letter = ".-.-." }
-				"-" { $letter = "-....-" }
-				"/" { $letter = "-..-." }
-				"." { $letter = ".-.-.-" }
-				"," { $letter = "--..--" }
-				";" { $letter = "-.-.-." }
-				":" { $letter = "---..." }
-				"_" { $letter = "..--.-" }
-				"(" { $letter = "-.--." }
-				")" { $letter = "-.--.-" }
-				"`'" { $letter = ".----." }
-				"`"" { $letter = ".-..-." }
-				"?" { $letter = "..--.." }
-				"¿" { $letter = "..-.-" }
-				"¡" { $letter = "--...-" }
-				" " { $letter = "/" }
-				#endregion Symbols
-			}
-			$line += $letter
+		$String = $String.ToUpper()
+		foreach ($char in $String.ToCharArray()) {
+			$morseCode = $letterToMorse[[string]$char]
+			$line += $morseCode
 		}
 		$data += $line -join (' ')
+
+		if ($audio.IsPresent) {
+			Write-Output ($data -join (' / '))
+			# Initial beep
+			[Console]::Beep(37, 1000)
+
+			foreach ($d in $data.ToCharArray()) {
+				switch ($d) {
+					'.' { [Console]::Beep(800, 100) }
+					'-' { [Console]::Beep(800, 300) }
+					'/' { [Console]::Beep(37, 600) }
+					' ' { Start-Sleep -Milliseconds 600 }
+					default {
+						Write-Warning "Unknown char: $_"
+						[Console]::Beep(2000, 1000)
+					}
+				}
+			}
+		} else {
+			return $data -join (' / ')
+		}
 	}
-	$data -join (' / ')
 }
