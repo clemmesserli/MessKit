@@ -17,7 +17,8 @@ Function ConvertFrom-Unicode {
         "Hello \u0048\u0065\u006C\u006C\u006F" | ConvertFrom-Unicode
         Output: "Hello Hello"
 
-        This example converts the Unicode escape sequences in the input string to their corresponding characters.
+		.NOTES
+		Enhanced by Codiumate
     #>
     [CmdletBinding()]
     Param (

@@ -13,6 +13,9 @@ Function ConvertTo-Geocode {
 			'1 Liberty Island - Ellis Island, New York, New Jersey 10004',
 			'162.123.18.140'
 		) -verbose
+
+		.NOTES
+		Enhanced by Codiumate
 	#>
 	[CmdletBinding()]
 	Param (

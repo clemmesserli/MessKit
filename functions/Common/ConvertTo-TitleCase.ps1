@@ -17,6 +17,9 @@ Function ConvertTo-TitleCase {
 		.EXAMPLE
 		(Get-Content ./private/names.txt) | ConvertTo-TitleCase
 		Accepts a file with a list of strings or content and converts each line to title case
+
+		.NOTES
+		Enhanced by Codiumate
 	#>
 	[CmdletBinding()]
 	Param (

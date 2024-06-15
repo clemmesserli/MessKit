@@ -17,6 +17,9 @@ Function ConvertFrom-Base64 {
 		.EXAMPLE
 		ConvertFrom-Base64 -Base64String "SGVsbG8gV29ybGQh" -Encoding UTF8
 		# Output: "Hello World"
+
+		.NOTES
+		Enhanced by Codiumate
 	#>
 	[CmdletBinding()]
 	Param (

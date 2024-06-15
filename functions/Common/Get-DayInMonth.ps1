@@ -1,20 +1,47 @@
 Function Get-DayInMonth {
 	<#
-	.EXAMPLE
+		.SYNOPSIS
+		Get the specific day of the week in a given month and year.
+
+		.DESCRIPTION
+		This function calculates and returns the date of a specific day of the week in a given month and year.
+		It takes parameters such as the month (either by name or number), day of the week, week number, and year.
+
+		.PARAMETER Month
+		Specifies the month for which the day needs to be calculated.
+		Accepts month names (e.g., January, February) or month numbers (1-12).
+
+		.PARAMETER MonthNumber
+		Specifies the month by its number (1-12).
+		This parameter is mutually exclusive with the 'Month' parameter.
+
+		.PARAMETER Day
+		Specifies the day of the week for which the date needs to be calculated.
+		Accepts values such as Sunday, Monday, Tuesday, etc.
+
+		.PARAMETER WeekNumber
+		Specifies the week number (1-5) for which the day needs to be calculated.
+
+		.PARAMETER Year
+		Specifies the year for which the day needs to be calculated.
+		Defaults to the current year if not specified.
+
+		.EXAMPLE
 		Get-DayInMonth -weeknumber 1 -day Monday -month September
 		Description: Labor Day
-	.EXAMPLE
+
+		.EXAMPLE
 		Get-DayInMonth -weeknumber 4 -day Thursday -month November
 		Description: Thanksgiving
-	.EXAMPLE
-		(1..12) | Foreach-Object { Get-DayInMonth -weeknumber 2 -day Tuesday -monthnumber $_ }
-		Description: Get every 2nd Tuesday of 12 months for current year
 
+		.EXAMPLE
+		(1..12) | Foreach-Object { Get-DayInMonth -weeknumber 2 -day Tuesday -monthnumber $_ }
+		Description: Get every 2nd Tuesday of 12 months for the current year
 	#>
 	[CmdletBinding()]
 	Param (
 		[Parameter(Mandatory, ParameterSetName = "Month")]
-		[ValidateSet("January", "February", "March", "April", "May", "June", "July", "August", "September", "November", "December")]
+		[ValidateSet("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")]
 		[string]$Month,
 
 		[Parameter(Mandatory, ParameterSetName = "MonthNumber")]
@@ -36,15 +63,20 @@ Function Get-DayInMonth {
 		if ( $PsCmdlet.ParameterSetName -eq "Month") {
 			$MonthNumber = [Array]::IndexOf([CultureInfo]::CurrentCulture.DateTimeFormat.MonthNames, $Month) + 1
 		}
-		$Date = Get-Date -Month $MonthNumber -Year $Year
 
-		$FirstDay = $Date.AddDays(1 - $Date.Day)
+		# Calculate the first day of the month
+		$FirstDayOfMonth = [datetime]::new($Year, $MonthNumber, 1)
 
-		[int]$Shift = $Day + 7 * $WeekNumber - $FirstDay.DayOfWeek
+		# Calculate the offset to the target day of the week
+		$DayOfWeekOffset = ($Day - $FirstDayOfMonth.DayOfWeek + 7) % 7
 
-		if ($FirstDay.DayOfWeek -le $Day) {
-			$Shift -= 7
-		}
-		$FirstDay.AddDays($Shift).ToString("dddd, MMMM dd, yyyy")
+		# Find the first occurrence of the target day of the week
+		$FirstOccurrence = $FirstDayOfMonth.AddDays($DayOfWeekOffset)
+
+		# Calculate the target date based on the week number
+		$TargetDate = $FirstOccurrence.AddDays(7 * ($WeekNumber - 1))
+
+		#$TargetDate.ToString("dddd, MMMM dd, yyyy")
+		$TargetDate
 	}
 }

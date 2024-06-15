@@ -12,6 +12,9 @@ Function ConvertFrom-Geocode {
 			@{Lat = 41.90313; Lon = 12.45384},
 			@{Lat = 40.6892; Lon = -74.0445}
 		) -verbose
+
+		.NOTES
+		Enhanced by Codiumate
 	#>
 	[CmdletBinding()]
 	Param (
