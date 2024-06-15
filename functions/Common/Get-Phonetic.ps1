@@ -1,52 +1,60 @@
 Function Get-Phonetic {
     <#
-    .SYNOPSIS
+        .SYNOPSIS
         Function to return the phonetic spelling from a list of one or more strings.
-    .DESCRIPTION
+
+        .DESCRIPTION
         This function expands the NATO spelling alphabet to also include non-alphanumeric characters on most computer keyboards.
-    .NOTES
+
+        .NOTES
         Legal Disclaimer:
         THIS SAMPLE CODE AND ANY RELATED INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
         EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
-    .EXAMPLE
+
+        .EXAMPLE
         Get-Phonetic -Strings "B85SZ0Oli!" -Output audio -VoiceName David -VoiceRate 2 -VoiceVolume 25
         Description: Returns matching phonetic alphabet in easy to read list format
-    .EXAMPLE
+
+        .EXAMPLE
         Get-Phonetic -Strings "P@ssw0rd!" -Output Json
         Description: Returns string name, string length, and the resulting phonetics
-    .EXAMPLE
+
+        .EXAMPLE
         $FormatEnumerationLimit = -1
         Get-Phonetic -Strings "P0w3rSh3!! ROcks1", "1l!|LoO0n B@$S&()" -Output raw | Out-Gridview
         Description: Returns the raw PSObject data within a separate window
-    .EXAMPLE
+
+        .EXAMPLE
         New-Password -PwdLength 18 | Get-Phonetic
         Description: Call 'New-Password' function for a new randomized value which is read out loud back to user so it only exists in memory and is not recorded in bash history
-    .EXAMPLE
+
+        .EXAMPLE
         New-GUID | Get-Phonetic -Output audio
         Description: Just another variation but this time using PowerShell built-in New-Guid cmdlet
-    .NOTES
+
+        .NOTES
         Enhanced by Codiumate
     #>
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory, ValueFromPipeline)]
-        [String[]]$Strings,
+        [string[]]$Strings,
 
         [Parameter()]
         [ValidateSet('Audio', 'List', 'Json', 'Raw')]
-        [String]$Output = 'List',
+        [string]$Output = 'List',
 
         [Parameter()]
         [ValidateRange(-10, 10)]
-        [Int]$VoiceRate = 0,
+        [int]$VoiceRate = 0,
 
         [Parameter()]
         [ValidateSet('David', 'Zira')]
-        [String]$VoiceName = 'David',
+        [string]$VoiceName = 'David',
 
         [Parameter()]
         [ValidateRange(0, 100)]
-        [Int]$VoiceVolume = 50
+        [int]$VoiceVolume = 50
     )
 
     Begin {}
