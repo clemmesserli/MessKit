@@ -200,6 +200,8 @@ Function Get-Phonetic {
 
         switch ($Output) {
             'Audio' {
+                Write-Debug "Original Input: $Strings"
+
                 # Use the built-in "Add-Type" cmdlet to load the System.Speech assembly
                 Add-Type -AssemblyName System.Speech
 
