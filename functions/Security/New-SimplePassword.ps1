@@ -1,26 +1,25 @@
 Function New-SimplePassword {
     <#
-    .SYNOPSIS
+        .SYNOPSIS
         Random Password Generator
-    .DESCRIPTION
+
+        .DESCRIPTION
         Random Password Generator
-    .EXAMPLE
+
+        .EXAMPLE
         New-SimplePassword
-    .EXAMPLE
-        New-SimplePassword -length "12"
+
+        .EXAMPLE
+        New-SimplePassword -length 12
     #>
     [CmdletBinding()]
     Param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(6, 48)]
-        $Length = "18"
+        [int]$Length = 18
     )
 
-    Begin {}
-
     Process {
-        -join ('abcdefghkmnrstuvwxyzABCDEFGHKLMNPRSTUVWXYZ23456789'.ToCharArray() | Get-Random -Count $Length)
+        -join ('abcdefghkmnrstuvwxyzABCDEFGHKLMNPRSTUVWXYZ23456789!@#$%^&*()_+-='.ToCharArray() | Get-Random -Count $Length)
     }
-
-    End {}
 }
