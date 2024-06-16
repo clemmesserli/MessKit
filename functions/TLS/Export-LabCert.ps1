@@ -1,62 +1,90 @@
 Function Export-LabCert {
   <#
-	.SYNOPSIS
-		Exports crt + pfx (optional) files from computer certificate store
-	.DESCRIPTION
-		This function can be used to export existing Windows certificates that have 'Exportable=True'.
-    You have the option of passing in a string to use for the password or it will autogenerate one and store in a text file within the same directory of the exported files.
-	.EXAMPLE
-		Export-LabCert -Subject 'MyRootCA'
-	.EXAMPLE
-		Export-LabCert -Subject 'MyIntermediateCA' -FolderPath 'C:\Certs'
-  .EXAMPLE
-		Export-LabCert -Subject 'demo1.mylab.com' -FolderPath 'C:\Certs' -PassPhrase (ConvertTo-SecureString 'GetABetterPwd' -AsPlainText -Force) -includekey
-  .NOTES
-    WARNING:
-    Use of this function could result in certificate passwords being stored in plain text.
-    This should only be used in lab environments.
+    .SYNOPSIS
+    Exports crt and optionally pfx files from computer certificate store.
+
+    .DESCRIPTION
+    Function to export existing Windows certificates including private keys where 'Exportable=True'.
+    Option to provide a password or auto-generate one.
+
+    .EXAMPLE
+    "MyLabRootCA2" | Export-LabCert -IncludeKey
+
+    .EXAMPLE
+    "MyLabRootCA", "MyLabIssuerCA" | Export-LabCert -IncludeKey
+
+    .EXAMPLE
+    Export-LabCert -Subject "demo1.mylab.com" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force) -IncludeKey
+
+    .EXAMPLE
+    Export-LabCert -Subject "MyLabCodeSign" -CertStore "CurrentUser" -FolderPath "C:\MyCerts" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force) -IncludeKey
+
+    .EXAMPLE
+    Export-LabCert -Subject "MyLabDocEncryption" -CertStore "CurrentUser"  -FolderPath "C:\MyCerts" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force)
+
+    .NOTES
+    WARNING: Use in lab environments only. Potential risk of storing certificate passwords in plain text.
 	#>
-  [cmdletbinding()]
+  [CmdletBinding()]
   param(
     [Parameter()]
     [string]$FolderPath = "C:\Certs",
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, ValueFromPipeline)]
     [Alias("SubjectName")]
-    [String]$Subject,
+    [string[]]$Subject,
 
     [Parameter()]
     [ValidateSet("LocalMachine", "CurrentUser")]
-    [String]$CertStore = "CurrentUser",
+    [string]$CertStore = "LocalMachine",
 
     [Parameter()]
-    [securestring]$PassPhrase,
+    [securestring]$Password,
 
     [Parameter()]
     [switch]$IncludeKey
   )
 
-  Begin {}
-
-  Process {
-
-    if ($PSBoundParameters.ContainsKey('PassPhrase')) {
-      # Since a SecureString was passed in, we will use a helper function to convert into plaintext in order to save in file
-      $PlainTextPassword = Convert-SecureStringToText -SecureString $PassPhrase
-    } else {
-      # Generate a pseudo-random password using the 'New-Password' function
-      $PlainTextPassword = New-Password -PwdLength 18
-      $PassPhrase = ConvertTo-SecureString -String "$PlainTextPassword" -Force -AsPlainText
-    }
-
-    $Cert = Get-ChildItem "Cert:\$CertStore\My" | Where-Object Subject -Match "$Subject"
-    Export-Certificate -Cert "Cert:\$CertStore\My\$($Cert.Thumbprint)" -FilePath "$FolderPath\$Subject.crt"
-
-    if ($PSBoundParameters.ContainsKey('IncludeKey')) {
-      Export-PfxCertificate -Cert "Cert:\$CertStore\My\$($Cert.Thumbprint)"  -FilePath "$FolderPath\$Subject.pfx" -Password $PassPhrase
-      Add-Content -Value "$Subject - $PlainTextPassword" -Path "$FolderPath\CertInfo.txt"
+  begin {
+    if (-not(Test-Path -Path $FolderPath)) {
+      try {
+        New-Item -Path $FolderPath -ItemType Directory -ErrorAction Stop
+      } catch {
+        Write-Error "Failed to create directory: $FolderPath"
+        throw
+      }
     }
   }
 
-  End {}
+  process {
+    foreach ($sub in $Subject) {
+      try {
+        $cert = Get-ChildItem -Path "Cert:\$CertStore\My" | Where-Object { $_.Subject -match "$sub" } -ErrorAction Stop
+      } catch {
+        Write-Error "Certificate with subject $sub not found."
+        continue
+      }
+
+      if ($IncludeKey) {
+        if (-not $Password) {
+          # Generate a pseudo-random password
+          $Password = ConvertTo-SecureString -String "$(New-Password -PwdLength 18)" -Force -AsPlainText
+        }
+
+        try {
+          Export-PfxCertificate -Cert "Cert:\$CertStore\My\$($cert.Thumbprint)"  -FilePath "$FolderPath\$Sub.pfx" -Password $Password
+          # Convert SecureString to PlainText and add entry to CertInfo file
+          Add-Content -Value "$Subject, $($cert.Thumbprint), $(ConvertFrom-SecureStringToText -SecureString $Password)" -Path "$FolderPath\CertInfo.txt"
+        } catch {
+          Write-Error "$sub : Failed to export PFX : $_"
+        }
+      } else {
+        try {
+          Export-Certificate -Cert "Cert:\$CertStore\My\$($cert.Thumbprint)" -FilePath "$FolderPath\$sub.crt" -ErrorAction Stop
+        } catch {
+          Write-Error "$sub : Failed to export CRT : $_"
+        }
+      }
+    }
+  }
 }
