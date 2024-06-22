@@ -4,7 +4,7 @@ Function ConvertFrom-Unicode {
         Converts Unicode escape sequences in a string to their corresponding Unicode characters.
 
         .DESCRIPTION
-        This function takes a string as input and converts any Unicode escape sequences (e.g. \uXXXX) to their corresponding Unicode characters.
+        This function takes a string as input and converts any Unicode escape sequences (e.g., \uXXXX) to their corresponding Unicode characters.
 
         .PARAMETER InputString
         The string containing Unicode escape sequences to be converted.
@@ -16,19 +16,24 @@ Function ConvertFrom-Unicode {
         .EXAMPLE
         "Hello \u0048\u0065\u006C\u006C\u006F" | ConvertFrom-Unicode
         Output: "Hello Hello"
-
-		.NOTES
-		Enhanced by Codiumate
     #>
     [CmdletBinding()]
-    Param (
+    [OutputType([string])]
+    param (
         [Parameter(Mandatory, ValueFromPipeline)]
-        [string] $InputString
+        [string[]] $InputString
     )
 
+    begin {
+        $regex = [regex]'\\u(?<Value>[a-fA-F0-9]{4})'
+    }
+
     Process {
-        $InputString | ForEach-Object {
-            [System.Text.RegularExpressions.Regex]::Unescape($_)
+        foreach ($string in $InputString) {
+            $regex.Replace($string, {
+                    param($match)
+                    [char]::ConvertFromUtf32([int]::Parse($match.Groups['Value'].Value, 'HexNumber'))
+                })
         }
     }
 }
