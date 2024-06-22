@@ -1,55 +1,91 @@
-Function Open-RDP {
-	<#
-	.SYNOPSIS
-		Open one or more RDP sessions
-	.DESCRIPTION
-		Open one or more RDP sessions using PowerShell PSCredential for authentication.
-	.EXAMPLE
-		Open-RDP Credential $Credential ComputerName "server01"
-	.EXAMPLE
-		$params = @{
-			Credential = $Credential
-			ComputerName = @("server01", "server02", "server03")
-			Verbose = $true
-		}
-		Open-RDP @params
-	.NOTES
-		If your default RDP profile has 'Always ask for credentials' checked,
-		you will still need to input the appropriate password when prompted as each RDP window is launched.
-	#>
-	[CmdletBinding()]
-	Param (
-		[ValidateNotNull()]
-		[System.Management.Automation.PSCredential]
-		[System.Management.Automation.Credential()]
-		[Alias("RunAs")]
-		$Credential,
+function Open-RDP {
+  <#
+  .SYNOPSIS
+  Open one or more RDP sessions
 
-		[Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-		[string[]]$ComputerName
-	)
+  .DESCRIPTION
+  Open one or more RDP sessions using PowerShell PSCredential for authentication.
 
-	Begin {}
+  .EXAMPLE
+  Open-RDP Credential $Credential ComputerName "L1PC1001" -Verbose
 
-	Process {
-		$userName = $Credential.GetNetworkCredential().UserName
-		$password = $Credential.GetNetworkCredential().Password
+  .EXAMPLE
+  $params = @{
+    Credential = $Credential
+    ComputerName = @(
+      "L1PC1001",
+      "L2PC1101"
+    )
+    Verbose = $true
+  }
+  Open-RDP @params
 
-		foreach ($computer in $ComputerName) {
-			# Resolve fqdn to avoid issues connecting to boxes in alternate domains
-			$dnsName = (Resolve-DnsName -Name $computer).name
+  .NOTES
+  If your default RDP profile has 'Always ask for credentials' checked,
+  you will still need to input the appropriate password when prompted as each RDP window is launched.
+  #>
+  [CmdletBinding()]
+  param (
+    [Parameter(Mandatory)]
+    [ValidateNotNull()]
+    [System.Management.Automation.PSCredential]
+    $Credential,
 
-			# Create a RDP credential using the PSCredential param input
-			$results = cmdkey.exe /generic:$dnsName /user:$userName /pass:$password
-			Write-Verbose "$dnsName : $results"
+    [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [string[]]$ComputerName,
 
-			# Launch RDP window using Microsoft Terminal Services Client
-			mstsc.exe /v:$dnsName /f
+    [Parameter()]
+    [switch]$FullScreen,
 
-			# Add delay simply to allow user to click the 'OK' inside each RDP terminal upon first launch
-			Start-Sleep -Seconds 10
-		}
-	}
+    [Parameter()]
+    [int]$DelaySeconds = 5
+  )
 
-	End {}
+  begin {
+    $userName = $Credential.UserName
+    # Avoid exposing the password as plain text
+    $securePassword = $Credential.Password
+  }
+
+  process {
+    foreach ($computer in $ComputerName) {
+      try {
+        # Create a RDP credential using the PSCredential param input
+        $cmdkeyResult = cmdkey.exe /generic:$computer /user:$userName /pass:(ConvertFrom-SecureString -SecureString $securePassword -AsPlainText)
+        Write-Verbose "$computer : $cmdkeyResult"
+
+        # Prepare mstsc arguments
+        $mstscArgs = @("/v:$computer")
+        if ($FullScreen) {
+          $mstscArgs += "/f"
+        }
+
+        # Launch RDP window using Microsoft Terminal Services Client
+        Start-Process -FilePath "mstsc.exe" -ArgumentList $mstscArgs
+
+        # Add delay to allow user to interact with the RDP window upon first launch
+        Start-Sleep -Seconds $DelaySeconds
+
+        [PSCustomObject]@{
+          ComputerName = $computer
+          Action       = "RDP session initiated"
+          Message      = "Credentials stored and RDP window launched"
+        }
+      } catch {
+        [PSCustomObject]@{
+          ComputerName = $computer
+          Action       = "Failed to initiate RDP session"
+          Error        = $_.Exception.Message
+        }
+      }
+    }
+  }
+
+  end {
+    # Clean up stored credentials after all connections are attempted
+    foreach ($computer in $ComputerName) {
+      $cleanupResult = cmdkey.exe /delete:$computer
+      Write-Verbose "$computer : $cleanupResult"
+    }
+  }
 }
