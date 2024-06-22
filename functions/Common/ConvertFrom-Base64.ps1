@@ -1,28 +1,25 @@
-Function ConvertFrom-Base64 {
+function ConvertFrom-Base64 {
 	<#
-		.SYNOPSIS
-		Converts a Base64 encoded string to plain text using the specified encoding.
+	.SYNOPSIS
+	Converts a Base64 encoded string to plain text using the specified encoding.
 
-		.DESCRIPTION
-		This function takes a Base64 encoded string as input and decodes it to plain text using the specified encoding.
-		The default encoding is UTF8.
+	.DESCRIPTION
+	This function takes a Base64 encoded string as input and decodes it to plain text using the specified encoding.
+	The default encoding is UTF8.
 
-		.PARAMETER Base64String
-		The Base64 encoded string to be decoded.
+	.PARAMETER Base64String
+	The Base64 encoded string to be decoded.
 
-		.PARAMETER Encoding
-		The encoding to be used for decoding the Base64 string.
-		Supported values: Ascii, BigEndianUnicode, BigEndianUTF32, Byte, Unicode, UTF32, UTF7, UTF8
+	.PARAMETER Encoding
+	The encoding to be used for decoding the Base64 string.
+	Supported values: Ascii, BigEndianUnicode, BigEndianUTF32, Byte, Unicode, UTF32, UTF7, UTF8
 
-		.EXAMPLE
-		ConvertFrom-Base64 -Base64String "SGVsbG8gV29ybGQh" -Encoding UTF8
-		# Output: "Hello World"
-
-		.NOTES
-		Enhanced by Codiumate
+	.EXAMPLE
+	ConvertFrom-Base64 -Base64String "SGVsbG8gV29ybGQh" -Encoding UTF8
+	# Output: "Hello World"
 	#>
 	[CmdletBinding()]
-	Param (
+	param (
 		[Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
 		[string]$Base64String,
 
@@ -31,7 +28,7 @@ Function ConvertFrom-Base64 {
 		[string]$Encoding = "UTF8"
 	)
 
-	Process {
+	process {
 		try {
 			$decodedBytes = [System.Convert]::FromBase64String($Base64String)
 			$decodedText = [System.Text.Encoding]::$Encoding.GetString($decodedBytes)
