@@ -1,38 +1,35 @@
 function ConvertFrom-SecureStringToText {
 	<#
-		.SYNOPSIS
-		Converts a secure string back to plain text.
+	.SYNOPSIS
+	Converts a secure string back to plain text.
 
-		.DESCRIPTION
-		Converts a secure string back to plain text.
+	.DESCRIPTION
+	Converts a secure string back to plain text.
 
-		.PARAMETER SecureString
-		The encrypted SecureString object you wish to convert back to plain text.
+	.PARAMETER SecureString
+	The encrypted SecureString object you wish to convert back to plain text.
 
-		.EXAMPLE
-		$password = Read-Host -Prompt 'Enter password' -AsSecureString
-		$plain = ConvertFrom-SecureStringToText -SecureString $password
+	.EXAMPLE
+	$password = Read-Host -Prompt 'Enter password' -AsSecureString
+	$plain = ConvertFrom-SecureStringToText -SecureString $password
 
-		.EXAMPLE
-		$cred = Get-Credential -UserName $env:USERNAME -Message 'Enter your password'
-		$plain = ConvertFrom-SecureStringToText -SecureString $cred.Password
+	.EXAMPLE
+	$cred = Get-Credential -UserName $env:USERNAME -Message 'Enter your password'
+	$plain = ConvertFrom-SecureStringToText -SecureString $cred.Password
 
-		.EXAMPLE
-		ConvertFrom-SecureStringToText -SecureString (Get-Secret demostring)
-		First retrieves a secure string from Secret Vault and then converts to plain text
-		Note:  Equivalent to (Get-Secret demostring -AsPlainText)
-
-		.NOTES
-		Enhanced by Codiumate
+	.EXAMPLE
+	ConvertFrom-SecureStringToText -SecureString (Get-Secret demostring)
+	First retrieves a secure string from Secret Vault and then converts to plain text
+	Note:  Equivalent to (Get-Secret demostring -AsPlainText)
 	#>
 	[CmdletBinding()]
-	Param (
+	param (
 		[Parameter(Mandatory, ValueFromPipeline)]
 		[System.Security.SecureString]
 		$SecureString
 	)
 
-	Process {
+	process {
 		try {
 			$ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToGlobalAllocUnicode($SecureString)
 			$plainText = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($ptr)
