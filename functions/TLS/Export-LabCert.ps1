@@ -1,29 +1,29 @@
-Function Export-LabCert {
+function Export-LabCert {
   <#
-    .SYNOPSIS
-    Exports crt and optionally pfx files from computer certificate store.
+  .SYNOPSIS
+  Exports crt and optionally pfx files from computer certificate store.
 
-    .DESCRIPTION
-    Function to export existing Windows certificates including private keys where 'Exportable=True'.
-    Option to provide a password or auto-generate one.
+  .DESCRIPTION
+  Export existing Windows certificates including private keys where 'Exportable=True'.
+  Option to provide a password or auto-generate one.
 
-    .EXAMPLE
-    "MyLabRootCA2" | Export-LabCert -IncludeKey
+  .EXAMPLE
+  "MyLabRootCA2" | Export-LabCert -IncludeKey
 
-    .EXAMPLE
-    "MyLabRootCA", "MyLabIssuerCA" | Export-LabCert -IncludeKey
+  .EXAMPLE
+  "MyLabRootCA", "MyLabIssuerCA" | Export-LabCert -IncludeKey
 
-    .EXAMPLE
-    Export-LabCert -Subject "demo1.mylab.com" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force) -IncludeKey
+  .EXAMPLE
+  Export-LabCert -Subject "demo1.mylab.com" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force) -IncludeKey
 
-    .EXAMPLE
-    Export-LabCert -Subject "MyLabCodeSign" -CertStore "CurrentUser" -FolderPath "C:\MyCerts" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force) -IncludeKey
+  .EXAMPLE
+  Export-LabCert -Subject "MyLabCodeSign" -CertStore "CurrentUser" -FolderPath "C:\MyCerts" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force) -IncludeKey
 
-    .EXAMPLE
-    Export-LabCert -Subject "MyLabDocEncryption" -CertStore "CurrentUser"  -FolderPath "C:\MyCerts" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force)
+  .EXAMPLE
+  Export-LabCert -Subject "MyLabDocEncryption" -CertStore "CurrentUser"  -FolderPath "C:\MyCerts" -Password (ConvertTo-SecureString "GetABetterPwd" -AsPlainText -Force)
 
-    .NOTES
-    WARNING: Use in lab environments only. Potential risk of storing certificate passwords in plain text.
+  .NOTES
+  WARNING: Use in lab environments only. Potential risk of storing certificate passwords in plain text.
 	#>
   [CmdletBinding()]
   param(
