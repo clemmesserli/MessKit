@@ -1,26 +1,48 @@
 function Enable-ScreenLock {
   [CmdletBinding()]
   param (
-    [Parameter(Mandatory = $false)]
-    [ValidateRange(1, 1440)]
-    [int]$Minutes = 20,
+    [Parameter()]
+    [ValidateScript({ Test-Path $_ -PathType Leaf })]
+    [string]$AudioPath,
 
-    [Parameter(Mandatory = $false)]
+    [Parameter(DontShow)]
     [ValidateRange(0, 100)]
-    [int]$Opacity = 25,
+    [int]$AudioVolume = 50,
 
-    [Parameter(Mandatory = $false)]
+    [Parameter(DontShow)]
+    [ValidateRange(0, 100)]
+    [int]$BlurRadius = 25,
+
+    [Parameter()]
+    [TimeSpan]$Duration = [TimeSpan]::FromMinutes(20),
+
+    [Parameter()]
+    [ValidateRange(0, 100)]
+    [int]$Opacity = 20,
+
+    [Parameter()]
+    [ValidateSet("black", "blue", "brown", "cyan", "green", "gray", "magenta", "orange", "purple", "red", "white", "yellow")]
+    [string]$FontColor = "#00FF00",
+
+    [Parameter()]
+    [ValidateRange(0, 100)]
+    [int]$FontSize = 60,
+
+    [Parameter()]
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
     [string]$ImagePath,
 
-    [Parameter(Mandatory = $false)]
-    [ValidateScript({ Test-Path $_ -PathType Leaf })]
-    [string]$AudioPath
+    [Parameter(DontShow)]
+    [ValidateRange(0, 100)]
+    [int]$ImageOpacity = 40,
+
+    [Parameter()]
+    [string]$MessageContent
   )
 
   begin {
     function Test-AdminPrivileges {
-            ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+      ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     }
 
     function ConvertTo-DecimalOpacity {
@@ -77,7 +99,7 @@ function Enable-ScreenLock {
         $audioPlayer = New-Object -ComObject WMPlayer.OCX
         $audioPlayer.URL = $AudioPath
         $audioPlayer.settings.setMode("loop", $true)
-        $audioPlayer.settings.volume = 50
+        $audioPlayer.settings.volume = $AudioVolume
       } catch {
         Write-Warning "Failed to initialize audio player: $_"
         $audioPlayer = $null
@@ -120,7 +142,7 @@ function Enable-ScreenLock {
         $background.Height = $screen.Bounds.Height
 
         $blurEffect = New-Object System.Windows.Media.Effects.BlurEffect
-        $blurEffect.Radius = 20
+        $blurEffect.Radius = $BlurRadius
         $background.Effect = $blurEffect
 
         $darkOverlay = New-Object System.Windows.Shapes.Rectangle
@@ -139,26 +161,42 @@ function Enable-ScreenLock {
           $imageOverlay.Stretch = [System.Windows.Media.Stretch]::Fill
           $imageOverlay.HorizontalAlignment = 'Center'
           $imageOverlay.VerticalAlignment = 'Center'
-          $imageOverlay.Opacity = $opacityDecimal
+          $imageOverlay.Opacity = (ConvertTo-DecimalOpacity -Value $ImageOpacity)
           [void]$grid.Children.Add($imageOverlay)
         }
 
         if ($screen.Primary) {
           $label = New-Object Windows.Controls.Label
-          $label.FontSize = 60
+          $label.FontSize = $FontSize
           $label.FontFamily = 'Consolas'
           $label.FontWeight = 'Bold'
           $label.Background = 'Transparent'
-          $label.Foreground = 'Blue'
+          $label.Foreground = $FontColor
           $label.VerticalAlignment = 'Center'
           $label.HorizontalAlignment = 'Center'
 
+          # Define the animation
+          $animation = New-Object Windows.Media.Animation.DoubleAnimation
+          $animation.From = 0.6 # Start from 60% opacity
+          $animation.To = 1.0 # Go to 100% opacity
+          $animation.Duration = New-Object Windows.Duration([System.TimeSpan]::FromSeconds(8))
+          $animation.AutoReverse = $false
+          $animation.EasingFunction = New-Object Windows.Media.Animation.ExponentialEase
+          $animation.RepeatBehavior = [Windows.Media.Animation.RepeatBehavior]::Forever
+
+          # Apply the animation to the Opacity property of the label
+          $storyboard = New-Object Windows.Media.Animation.Storyboard
+          [Windows.Media.Animation.Storyboard]::SetTarget($animation, $label)
+          [Windows.Media.Animation.Storyboard]::SetTargetProperty($animation, "(UIElement.Opacity)")
+          $storyboard.Children.Add($animation)
+          $storyboard.Begin()
+
           $contentBorder = New-Object System.Windows.Controls.Border
           $contentBorder.Background = [System.Windows.Media.Brushes]::Transparent
-          $contentBorder.Width = $screen.Bounds.Width * 0.3
-          $contentBorder.Height = $screen.Bounds.Height * 0.1
-          $contentBorder.HorizontalAlignment = 'Center'
-          $contentBorder.VerticalAlignment = 'Center'
+          $contentBorder.Width = $screen.Bounds.Width * 0.8
+          $contentBorder.Height = $screen.Bounds.Height * 0.4
+          $contentBorder.HorizontalAlignment = 'Stretch'
+          $contentBorder.VerticalAlignment = 'Stretch'
 
           $contentBorder.Child = $label
           [void]$grid.Children.Add($contentBorder)
@@ -175,7 +213,7 @@ function Enable-ScreenLock {
     [void][UserInput]::BlockInput($true)
     [void][UserInput]::ShowCursor($false)
 
-    $finishTime = (Get-Date).AddMinutes($Minutes)
+    $finishTime = (Get-Date).Add($Duration)
 
     if ($audioPlayer) {
       $audioPlayer.controls.play()
@@ -186,10 +224,10 @@ function Enable-ScreenLock {
           foreach ($window in $windows) {
             $window.Show()
           }
-          for ($i = $Minutes * 60; $i -gt 0; $i--) {
+          for ($i = $Duration.TotalSeconds; $i -gt 0; $i--) {
             $elapsedTime = New-TimeSpan -Start (Get-Date) -End $finishTime
             if ($label) {
-              $label.Content = "Time Remaining: $($elapsedTime.ToString('hh\:mm\:ss'))"
+              $label.Content = "$MessageContent`nTime Remaining: $($elapsedTime.ToString('hh\:mm\:ss'))"
               [void]$label.Dispatcher.Invoke([Action] {}, 'Background')
             }
             Start-Sleep -Seconds 1
