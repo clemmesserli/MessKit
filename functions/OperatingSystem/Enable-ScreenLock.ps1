@@ -25,10 +25,6 @@ function Enable-ScreenLock {
     [string]$FontColor = "#00FF00",
 
     [Parameter()]
-    [ValidateRange(0, 100)]
-    [int]$FontSize = 60,
-
-    [Parameter()]
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
     [string]$ImagePath,
 
@@ -167,7 +163,6 @@ function Enable-ScreenLock {
 
         if ($screen.Primary) {
           $label = New-Object Windows.Controls.Label
-          $label.FontSize = $FontSize
           $label.FontFamily = 'Consolas'
           $label.FontWeight = 'Bold'
           $label.Background = 'Transparent'
@@ -200,6 +195,11 @@ function Enable-ScreenLock {
 
           $contentBorder.Child = $label
           [void]$grid.Children.Add($contentBorder)
+
+          # Set the FontSize after the window is loaded
+          $window.add_Loaded({
+              $label.FontSize = $window.ActualWidth * 0.02
+            })
         }
 
         $window.Content = $grid
