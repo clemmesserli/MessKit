@@ -1,58 +1,71 @@
 function Unprotect-MySecret {
   <#
   .SYNOPSIS
-  Decrypts a secret using a passphrase from a file.
+  Function to decrypt a secret using a pre-shared passphrase.
 
   .DESCRIPTION
-  This function reads an encrypted secret from a file, decrypts it using the provided secure passphrase,
-  and returns the decrypted secret.
+  This function takes a SecureString passphrase and either an encrypted string or a file path containing the encrypted content.
+  It decrypts the secret using the passphrase and returns the decrypted secret as a string.
 
   .PARAMETER Passphrase
-  The passphrase used for decryption, as a SecureString. It must match the passphrase used for encryption.
+  The SecureString passphrase used to decrypt the secret.
 
-  .PARAMETER InputPath
-  The path to the file containing the encrypted secret. Defaults to a file named 'secret.txt' in the temp directory.
+  .PARAMETER FilePath
+  Optional. The file path containing the encrypted content. If not provided, a default path is used.
 
-  .EXAMPLE
-  $securePass = Read-Host "Enter passphrase" -AsSecureString
-  $secret = Unprotect-MySecret -Passphrase $securePass
-  Write-Host "The secret is: $secret"
+  .PARAMETER Secret
+  Optional. The encrypted string to decrypt. Can be provided via pipeline.
 
   .EXAMPLE
-  $securePass = ConvertTo-SecureString "My secure passphrase" -AsPlainText -Force
-  $secret = Unprotect-MySecret -Passphrase $securePass -InputPath "C:\Secrets\encrypted.txt"
+  $PassPhrase = Read-Host "Enter passphrase" -AsSecureString
+  Unprotect-MySecret -Passphrase $PassPhrase -FilePath "$env:tmp\encrypted.txt"
+  Decrypts and displays the plain-text version of "$env:tmp\encrypted.txt" using a pre-shared passphrase.
 
   .EXAMPLE
-  $securePass = ConvertTo-SecureString "Good Boy, Duke!" -AsPlainText -Force
-  $secret = Unprotect-MySecret -Passphrase $securePass -InputPath "$env:TEMP\secret.txt"
-
-  .NOTES
-  If decryption fails (e.g., due to an incorrect passphrase), the function returns $null and displays a warning.
+  $PassPhrase = ConvertTo-SecureString "Good Boy, Duke!" -AsPlainText -Force
+  $MySecret = Protect-MySecret -Secret "My super secret" -Passphrase $PassPhrase -DisplaySecret
+  Unprotect-MySecret -Secret $MySecret -Passphrase $PassPhrase
+  Shows how one might store into a variable and then re-populate later without use of filesystem
   #>
   [CmdletBinding()]
   param (
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory)]
     [SecureString]$Passphrase,
 
-    [Parameter(Mandatory = $false)]
-    [string]$InputPath = "$env:TEMP\secret.txt"
+    [Parameter(ParameterSetName = "FromFile")]
+    [string]$FilePath,
+
+    [Parameter(ValueFromPipeline, ParameterSetName = "FromString")]
+    [string]$Secret
   )
 
-  $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Passphrase)
-  $unsecurePassphrase = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
-  [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
+  begin {
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Passphrase)
+    $unsecurePassphrase = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+    [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR)
 
-  $key = [System.Text.Encoding]::UTF8.GetBytes($unsecurePassphrase.PadRight(32).Substring(0, 32))
+    $key = [System.Text.Encoding]::UTF8.GetBytes($unsecurePassphrase.PadRight(32).Substring(0, 32))
+  }
 
-  try {
-    $encryptedContent = Get-Content -Path $InputPath -ErrorAction Stop
-    $secureString = ConvertTo-SecureString -String $encryptedContent -Key $key -ErrorAction Stop
-    $decryptedSecret = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-      [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString)
-    )
-    return $decryptedSecret
-  } catch {
-    Write-Warning "Failed to decrypt the secret. Make sure the passphrase is correct."
-    return $null
+  process {
+    try {
+      if ($PSCmdlet.ParameterSetName -eq "FromFile") {
+        if (-not $FilePath) {
+          $FilePath = "$env:TEMP\secret.txt"
+        }
+        $encryptedContent = Get-Content -Path $FilePath -ErrorAction Stop
+      } else {
+        $encryptedContent = $Secret
+      }
+
+      $secureString = ConvertTo-SecureString -String $encryptedContent -Key $key -ErrorAction Stop
+      $decryptedSecret = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString)
+      )
+      return $decryptedSecret
+    } catch {
+      Write-Warning "Failed to decrypt the secret. Make sure the passphrase is correct and the input is valid."
+      return $null
+    }
   }
 }
