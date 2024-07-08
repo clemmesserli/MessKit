@@ -41,7 +41,7 @@
   Description: Encrypts the file "SecretFile.txt" using AES128 + CBC.
 
   .EXAMPLE
-  Protect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile.txt" -EncryptionMethod RSA -RSAKeySize 1024 -Base64
+  Protect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile.txt" -Base64 -EncryptionMethod RSA -RSAKeySize 1024
   Description: Encrypts the file "SecretFile.txt" using RSA encryption algorithm with a minimal keysize and then adds base64 encoding.
 
   .EXAMPLE
