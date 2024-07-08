@@ -24,16 +24,12 @@
 
   .EXAMPLE
   $cert = Get-Item Cert:\CurrentUser\My\833ED9148FD08F577D2AD743BAF71295AFEF345C
-  Protect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile.enc"
+  UnProtect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile.enc"
   Description: Decrypts the file "SecretFile.enc" using default values (AES256 + GCM)
 
   .EXAMPLE
   Unprotect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile2.enc"
   Description: Decrypts the file "SecretFile.enc" using custom values (AES128 + CBC) which are stored as part of the encryption process.
-
-  .EXAMPLE
-  Unprotect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile.enc"
-  Description: This example decrypts the file "SecretFile.enc" using the specified certificate.
 
   .EXAMPLE
   Unprotect-MyFile -Certificate $cert -FilePath "C:\Certs\SecretFile.enc" -Base64 -DeleteOriginal
@@ -79,10 +75,10 @@
     [System.IO.FileInfo]$FilePath,
 
     [Parameter()]
-    [ValidateSet("csv", "txt")]
+    [ValidateSet("csv", "txt", "ps1")]
     [string]$FileExtension = "txt",
 
-    [switch]$Base64Decode,
+    [switch]$Base64,
 
     [switch]$DeleteOriginal
   )
@@ -105,10 +101,11 @@
 
       $fileStreamReader = [System.IO.File]::Open($FilePath.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
 
-      if ($Base64Decode) {
+      if ($Base64) {
         $base64Content = [System.IO.File]::ReadAllText($FilePath.FullName)
         $encryptedBytes = [Convert]::FromBase64String($base64Content)
         $memoryStream = [System.IO.MemoryStream]::new($encryptedBytes)
+        $memoryStream.Position = 0  # Reset the stream position
       } else {
         $memoryStream = $fileStreamReader
       }
@@ -118,10 +115,8 @@
 
       $rsaProvider = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($Certificate)
 
-
       if ($EncryptionMethod -eq "RSA") {
         Write-Verbose "RSA w/ OAEP"
-        $rsaProvider = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($Certificate)
         Write-Verbose "Decryption key size: $($rsaProvider.KeySize) bits"
 
         $paddingModes = @(
@@ -176,9 +171,7 @@
           $null = $fileStreamWriter.Write($decryptedData, 0, $decryptedData.Length)
           Write-Verbose "Successfully wrote decrypted data of length: $($decryptedData.Length)"
         }
-      }
-
-      if ($EncryptionMethod -eq "AES") {
+      } elseif ($EncryptionMethod -eq "AES") {
         $lenKey = New-Object byte[] 4
         [void]$memoryStream.Read($lenKey, 0, 4)
         [int]$keyLength = [System.BitConverter]::ToInt32($lenKey, 0)
