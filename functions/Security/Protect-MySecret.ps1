@@ -25,7 +25,6 @@ function Protect-MySecret {
   $PassPhrase = ConvertTo-SecureString "Good Boy, Duke!" -AsPlainText -Force
   Protect-MySecret -Secret "My super secret" -Passphrase $PassPhrase -DisplaySecret
 
-
   .EXAMPLE
   $PassPhrase = ConvertTo-SecureString "Good Boy, Duke!" -AsPlainText -Force
   $content = @"
@@ -40,6 +39,7 @@ function Protect-MySecret {
   2. Pray as you are still missing ingredients :)
 "@
   $content | Protect-MySecret -Passphrase $PassPhrase -FilePath "$env:TEMP\secret.txt"
+  $content | Protect-MySecret -Passphrase $PassPhrase -DisplaySecret
 
   .NOTES
   The secret is encrypted using AES encryption with a 256-bit key derived from the passphrase.
