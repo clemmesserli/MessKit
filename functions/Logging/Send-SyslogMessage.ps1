@@ -39,7 +39,7 @@ Send-SyslogMessage mySyslogserver "The server is down!" Emergency Mail
 Sends a syslog message to mysyslogserver, saying "server is down", severity emergency and facility is mail
 
 .EXAMPLE
-Send-SyslogMessage -Server 10.56.6.40 -Message "The server is down!" -Severity Emergency -Facility Mail -Hostname USCR52QR9Z2
+Send-SyslogMessage -Server 10.56.6.40 -Message "The server is down!" -Severity Emergency -Facility Mail -Hostname $env:COMPUTERNAME
 
 
 .NOTES
