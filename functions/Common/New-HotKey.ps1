@@ -2,13 +2,16 @@ Function New-HotKey {
 	<#
 	.SYNOPSIS
 		Script can be used to create your own 'Hot-Key' combinations
+
 	.DESCRIPTION
 		Script can be used to create your own 'Hot-Key' combinations to then launch a given script file
+
 	.EXAMPLE
 		New-HotKey -LinkPath "$($env:OneDrive)\Desktop\Demo1.lnk" -TargetPath "calc.exe" -IconLocation "C:\Windows\System32\calc.exe" -HotKey 'Ctrl+Alt+C'
 		Creates a desktop shortcut on desktop that can be launched by double-clicking or by use of hot-key combo
 
 		%ProgramFiles%\CyberArk\Endpoint Privilege Manager\Agent\vf_agent.exe
+
 	.EXAMPLE
 		$params = @{
 			LinkPath = "$($env:OneDrive)\Desktop\Demo2.lnk"
