@@ -1,4 +1,4 @@
-function Close-RDP {
+function  {
   <#
   .SYNOPSIS
   Close one or more RDP sessions
@@ -8,14 +8,14 @@ function Close-RDP {
   The list of computers can be dynamically queried from local machine event log or statically provided.
 
   .EXAMPLE
-  Close-RDP -Credential $Credential -ComputerName server01
+   -Credential $Credential -ComputerName server01
 
   .EXAMPLE
-  Close-RDP -Credential $Credential -ComputerName (Get-RDPLog -StartTime 1/01/2022 -EndTime 1/08/2022)
+   -Credential $Credential -ComputerName (Get-RDPLog -StartTime 1/01/2022 -EndTime 1/08/2022)
   Close any active or disconnected RDP sessions as found in local machine event log between the dates entered
 
   .EXAMPLE
-  Close-RDP -Credential $Credential -ComputerName (Get-Content ./private/servers.txt)
+   -Credential $Credential -ComputerName (Get-Content ./private/servers.txt)
 
   .EXAMPLE
   $param = @{
@@ -26,7 +26,7 @@ function Close-RDP {
     )
     Verbose = $true
   }
-  Close-RDP @param
+   @param
   #>
   [CmdletBinding()]
   param (
