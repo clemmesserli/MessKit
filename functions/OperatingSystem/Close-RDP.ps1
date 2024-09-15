@@ -1,4 +1,4 @@
-function  {
+function Close-RDP {
   <#
   .SYNOPSIS
   Close one or more RDP sessions
@@ -44,7 +44,7 @@ function  {
       $rdp = quser 2>&1
       if ($rdp -match "ID") {
         $user = $rdp -replace '\s{2,}', ',' | ConvertFrom-Csv |
-          Where-Object { $_.USERNAME -eq $using:Credential.UserName }
+        Where-Object { $_.USERNAME -eq $using:Credential.UserName }
         if ($user) {
           $result = logoff $user.ID 2>&1
           [PSCustomObject]@{
@@ -74,8 +74,8 @@ function  {
       try {
         # Close local RDP client process
         Get-Process |
-          Where-Object { $_.MainWindowTitle -match [regex]::Escape($computer.Split('.')[0]) } |
-            Stop-Process -Force -ErrorAction SilentlyContinue
+        Where-Object { $_.MainWindowTitle -match [regex]::Escape($computer.Split('.')[0]) } |
+        Stop-Process -Force -ErrorAction SilentlyContinue
 
         # Remote logoff
         $params = @{
