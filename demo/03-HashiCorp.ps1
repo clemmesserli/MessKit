@@ -45,31 +45,9 @@ Set-Content -Path "C:\MyVault\HashiCorp\config.hcl" -Value $config
 Set-Variable VAULT_ADDR=http://127.0.0.1:8200
 vault.exe operator init
 
-vault operator unseal WTQMuiLdJpJikelAo8mu83ynwh5PhER3Yktn/+MkgwwN
-vault operator unseal VQ/oIt01hsdzbtSqMD64pOUaU0TsSELkc9XgZcoT+w5/
-vault operator unseal riIYfvmwjVuX3dJHf8218fyf4IzSb5qLDFa9hl9lk0mY
-
-<#
-Unseal Key 1: WTQMuiLdJpJikelAo8mu83ynwh5PhER3Yktn/+MkgwwN
-Unseal Key 2: FR4CFehDr1U+gbBajUG9WM3FL5HYh/Wypvajw1Mo97ys
-Unseal Key 3: VQ/oIt01hsdzbtSqMD64pOUaU0TsSELkc9XgZcoT+w5/
-Unseal Key 4: riIYfvmwjVuX3dJHf8218fyf4IzSb5qLDFa9hl9lk0mY
-Unseal Key 5: 7T8rTikkybv0ZCl1rE3koZLTUbFxWheFhDjV2NS/Wh2Z
-
-Initial Root Token: hvs.q4uugeqlhBwhTNEkkBvokQ87
-
-Vault initialized with 5 key shares and a key threshold of 3. Please securely
-distribute the key shares printed above. When the Vault is re-sealed,
-restarted, or stopped, you must supply at least 3 of these keys to unseal it
-before it can start servicing requests.
-
-Vault does not store the generated root key. Without at least 3 keys to
-reconstruct the root key, Vault will remain permanently sealed!
-
-It is possible to generate new unseal keys, provided you have a quorum of
-existing unseal keys shares. See "vault operator rekey" for more information.
-#>
-
+vault operator unseal { { $var1 } }
+vault operator unseal { { $var2 } }
+vault operator unseal { { $var3 } }
 
 <#
 # To Set as a ScheduledTask to run upon Startup
@@ -82,7 +60,6 @@ Start-ScheduledTask -TaskName "VaultServer"
 #>
 
 
-
 #Extract the Certificate:
 openssl pkcs12 -in C:\MyVault\HashiCorp\cert\myvault.pfx -clcerts -nokeys -out C:\MyVault\HashiCorp\cert\myvault.crt
 
@@ -90,19 +67,17 @@ openssl pkcs12 -in C:\MyVault\HashiCorp\cert\myvault.pfx -clcerts -nokeys -out C
 openssl pkcs12 -in C:\MyVault\HashiCorp\cert\myvault.pfx -nocerts -nodes -out C:\MyVault\HashiCorp\cert\myvault.key
 
 
-
-
 $env:VAULT_ADDR = "https://l4ws1901.messlabs.com:8200"
-$env:VAULT_TOKEN = "hvs.q4uugeqlhBwhTNEkkBvokQ87"
+$env:VAULT_TOKEN = $vault_token
 
 $headers = @{
 	"X-VAULT-TOKEN" = $env:VAULT_TOKEN
 }
 
 $keys = @(
-	"WTQMuiLdJpJikelAo8mu83ynwh5PhER3Yktn/+MkgwwN"
-	"FR4CFehDr1U+gbBajUG9WM3FL5HYh/Wypvajw1Mo97ys"
-	"VQ/oIt01hsdzbtSqMD64pOUaU0TsSELkc9XgZcoT+w5/"
+	$key1
+	$key2
+	$key3
 )
 
 #region Unseal
