@@ -30,6 +30,18 @@ $certParams = @{
 	UPN           = "LabAdmin@messlabs.com"
 }
 New-LabCert @certParams
+
+$certParams = @{
+	CertStore     = "CurrentUser"
+	CertType      = "ClientAuth"
+	Days          = 30
+	NonExportable = $false
+	Issuer        = "MyLabIssuerCA"
+	Subject       = "CN=HelpDeskUser,OU=Users,DC=messlabs,DC=com"
+	TargetDomain  = "lab04.messlabs.com"
+	UPN           = "HelpDeskUser@messlabs.com"
+}
+New-LabCert @certParams
 #endregion 04
 
 #region 05 - Creating a website certificate for Hashicorp Vault
