@@ -1,4 +1,3 @@
-
 New-Item C:\MyVault\HashiCorp -ItemType Directory -Force
 
 $srcFolder = "C:\LabSources\CustomPackages\vault.zip"
@@ -17,7 +16,6 @@ Set-Location $dstFolder
 & .\vault.exe version
 
 & .\vault.exe server -dev
-
 
 # Create a config hcl
 $config = @"
@@ -71,21 +69,21 @@ $env:VAULT_ADDR = "https://l4ws1901.messlabs.com:8200"
 $env:VAULT_TOKEN = $vault_token
 
 $headers = @{
-	"X-VAULT-TOKEN" = $env:VAULT_TOKEN
+  "X-VAULT-TOKEN" = $env:VAULT_TOKEN
 }
 
 $keys = @(
-	$key1
-	$key2
-	$key3
+  $key1
+  $key2
+  $key3
 )
 
 #region Unseal
 foreach ($key in $keys) {
-	$json = @"
+  $json = @"
     {"key":"$key"}
 "@
-	Invoke-RestMethod -Method Post -Headers $headers -Uri "$($env:VAULT_ADDR)/v1/sys/unseal" -Body $json
+  Invoke-RestMethod -Method Post -Headers $headers -Uri "$($env:VAULT_ADDR)/v1/sys/unseal" -Body $json
 }
 #endregion
 
@@ -97,8 +95,8 @@ Invoke-RestMethod -Method Get -Headers $headers -Uri "$($env:VAULT_ADDR)/v1/sys/
 
 #region Enable AppRole Auth
 $headers = @{
-	"X-VAULT-TOKEN"   = $env:VAULT_TOKEN
-	"X-Vault-Request" = "true"
+  "X-VAULT-TOKEN"   = $env:VAULT_TOKEN
+  "X-Vault-Request" = "true"
 }
 $json = @"
     {
@@ -179,9 +177,9 @@ Invoke-RestMethod -Method Get -Headers $headers -Uri "$($env:VAULT_ADDR)/v1/sys/
 $cert = Get-ChildItem Cert:\CurrentUser\My | Where-Object Subject -Match 'LabAdmin' | Sort-Object -Descending | Select-Object -Top 1
 
 $param = @{
-	uri         = "$($env:VAULT_ADDR)/v1/auth/cert/login"
-	certificate = $cert
-	method      = "Post"
+  uri         = "$($env:VAULT_ADDR)/v1/auth/cert/login"
+  certificate = $cert
+  method      = "Post"
 }
 $response = Invoke-RestMethod @param
 
