@@ -115,7 +115,7 @@
         $lenKey = [System.BitConverter]::GetBytes($encryptedKey.Length)
         $fileStreamWriter.Write($lenKey, 0, 4)
         $fileStreamWriter.Write($encryptedKey, 0, $encryptedKey.Length)
-        $fileStreamWriter.WriteByte([byte]($AESMode -eq "GCM" ? 1 : 0))  # Write AES mode indicator
+        $fileStreamWriter.WriteByte([byte](if ($AESMode -eq "GCM") { 1 } else { 0 }))  # Write AES mode indicator
 
         if ($AESMode -eq "GCM") {
           $aesGcm = [System.Security.Cryptography.AesGcm]::new($aesProvider.Key)
