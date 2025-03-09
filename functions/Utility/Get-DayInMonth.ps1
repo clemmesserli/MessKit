@@ -4,12 +4,14 @@ function Get-DayInMonth {
   Get the specific day of the week in a given month and year.
 
   .DESCRIPTION
-  This function calculates and returns the date of a specific day of the week in a given month and year.
-  It takes parameters such as the month (either by name or number), day of the week, week number, and year.
+  The Get-DayInMonth function calculates the date for a specific occurrence (by week number)
+  of a day of the week in a given month and year. This is useful for determining dates of
+  holidays or events that occur on specific week numbers, like Thanksgiving (4th Thursday
+  in November) or Labor Day (1st Monday in September).
 
   .PARAMETER Month
   Specifies the month for which the day needs to be calculated.
-  Accepts month names (e.g., January, February) or month numbers (1-12).
+  Accepts month names (e.g., January, February).
 
   .PARAMETER MonthNumber
   Specifies the month by its number (1-12).
@@ -28,28 +30,39 @@ function Get-DayInMonth {
 
   .EXAMPLE
   Get-DayInMonth -weeknumber 1 -day Monday -month September
-  Description: Labor Day
+
+  Returns the date of Labor Day (1st Monday in September) for the current year.
 
   .EXAMPLE
   Get-DayInMonth -weeknumber 4 -day Thursday -month November
-  Description: Thanksgiving
+
+  Returns the date of Thanksgiving (4th Thursday in November) for the current year.
 
   .EXAMPLE
   (1..12) | Foreach-Object { Get-DayInMonth -weeknumber 2 -day Tuesday -monthnumber $_ }
-  Description: Get every 2nd Tuesday of 12 months for the current year
+
+  Returns the date of every 2nd Tuesday of each month for the current year.
+
+  .OUTPUTS
+  System.DateTime
+  Returns a DateTime object representing the calculated date.
+
+  .NOTES
+  Author: MessKit Team
+  Last Update: March 6, 2025
   #>
   [CmdletBinding()]
   param (
-    [Parameter(Mandatory, ParameterSetName = "Month")]
-    [ValidateSet("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")]
+    [Parameter(Mandatory, ParameterSetName = 'Month')]
+    [ValidateSet('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')]
     [string]$Month,
 
-    [Parameter(Mandatory, ParameterSetName = "MonthNumber")]
+    [Parameter(Mandatory, ParameterSetName = 'MonthNumber')]
     [ValidateRange(1, 12)]
     [int]$MonthNumber,
 
     [Parameter(Mandatory)]
-    [ValidateSet("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")]
+    [ValidateSet('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')]
     [System.DayOfWeek]$Day,
 
     [Parameter(Mandatory)]
@@ -60,7 +73,7 @@ function Get-DayInMonth {
   )
 
   process {
-    if ( $PsCmdlet.ParameterSetName -eq "Month") {
+    if ( $PsCmdlet.ParameterSetName -eq 'Month') {
       $MonthNumber = [Array]::IndexOf([CultureInfo]::CurrentCulture.DateTimeFormat.MonthNames, $Month) + 1
     }
 

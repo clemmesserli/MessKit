@@ -4,19 +4,46 @@ function ConvertTo-TitleCase {
   Converts the first letter of each word in a string to uppercase and all other letters to lowercase.
 
   .DESCRIPTION
-  This function takes a string of raw text and converts the first letter of each word to uppercase and all other letters to lowercase.
+  The ConvertTo-TitleCase function takes one or more strings and formats them in title case
+  by converting the first letter of each word to uppercase and all other letters to lowercase.
+  This function works with single strings, multiple strings, or strings received from the pipeline.
+
+  It leverages the .NET TextInfo.ToTitleCase method which follows proper title casing rules
+  for the current culture.
+
+  .PARAMETER String
+  Specifies the string(s) to convert to title case. This parameter accepts an array of strings
+  and can receive input from the pipeline. Empty strings are allowed but will be returned unchanged.
 
   .EXAMPLE
   ConvertTo-TitleCase -String "jane doe"
-  Converts "jane doe" to "Jane Doe".
+
+  Output: Jane Doe
 
   .EXAMPLE
   ConvertTo-TitleCase -String "THE quick Brown FoX", "COW JUMPED OVER THE MOON!"
-  Converts "THE quick Brown FoX" and "COW JUMPED OVER THE MOON!" to title case.
+
+  Output:
+  The Quick Brown Fox
+  Cow Jumped Over The Moon!
 
   .EXAMPLE
   (Get-Content ./private/names.txt) | ConvertTo-TitleCase
-  Accepts a file with a list of strings or content and converts each line to title case
+
+  Accepts content from a file and converts each line to title case.
+
+  .EXAMPLE
+  "lowercase text" | ConvertTo-TitleCase
+
+  Output: Lowercase Text
+
+  .OUTPUTS
+  [System.String[]]
+  Returns the input string(s) in title case format.
+
+  .NOTES
+  This function properly handles empty strings and will report verbose information
+  about the conversion process when -Verbose is used.
   #>
   [CmdletBinding()]
   param (

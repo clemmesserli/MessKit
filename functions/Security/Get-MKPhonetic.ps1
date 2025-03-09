@@ -5,6 +5,34 @@ function Get-MKPhonetic {
 
   .DESCRIPTION
   This function expands the NATO spelling alphabet to also include non-alphanumeric characters on most computer keyboards.
+  It can output the phonetic spelling in multiple formats (list, JSON, raw object) or even speak it using text-to-speech.
+
+  .PARAMETER Strings
+  One or more strings to convert to phonetic spelling. Accepts pipeline input.
+
+  .PARAMETER Output
+  The output format for the phonetic spelling:
+  - List: Text output showing each character and its phonetic equivalent (default)
+  - Audio: Speaks the phonetic spelling using text-to-speech
+  - Json: Returns a JSON representation of the phonetic spelling
+  - Raw: Returns the raw PSObject
+
+  .PARAMETER VoiceRate
+  Speech rate when using Audio output. Range: -10 (very slow) to 10 (very fast). Default: 0 (normal speed).
+
+  .PARAMETER VoiceName
+  Voice to use for Audio output. Options: David (male) or Zira (female). Default: David.
+
+  .PARAMETER VoiceVolume
+  Volume level for Audio output. Range: 0 (silent) to 100 (maximum). Default: 50.
+
+  .INPUTS
+  System.String[]
+  You can pipe strings to Get-MKPhonetic.
+
+  .OUTPUTS
+  System.String, System.Management.Automation.PSObject, or System.String (JSON)
+  Output type depends on the -Output parameter setting.
 
   .NOTES
   Legal Disclaimer:
@@ -12,25 +40,35 @@ function Get-MKPhonetic {
   EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
   .EXAMPLE
-  Get-MKPhonetic -Strings "B85SZ0Oli!" -Output audio -VoiceName David -VoiceRate 2 -VoiceVolume 25
-  Description: Returns matching phonetic alphabet in easy to read list format
+  Get-MKPhonetic -Strings "B85SZ0Oli!"
+
+  Description: Returns the phonetic spelling of "B85SZ0Oli!" in list format.
+
+  .EXAMPLE
+  Get-MKPhonetic -Strings "B85SZ0Oli!" -Output Audio -VoiceName David -VoiceRate 2 -VoiceVolume 25
+
+  Description: Speaks the phonetic spelling of "B85SZ0Oli!" using David's voice at a faster rate and lower volume.
 
   .EXAMPLE
   Get-MKPhonetic -Strings "P@ssw0rd!" -Output Json
-  Description: Returns string name, string length, and the resulting phonetics
+
+  Description: Returns the string, length, and phonetic representation as a JSON object.
 
   .EXAMPLE
   $FormatEnumerationLimit = -1
-  Get-MKPhonetic -Strings "P0w3rSh3!! ROcks1", "1l!|LoO0n B@$S&()" -Output raw | Out-Gridview
-  Description: Returns the raw PSObject data within a separate window
+  Get-MKPhonetic -Strings "P0w3rSh3!! ROcks1", "1l!|LoO0n B@$S&()" -Output Raw | Out-GridView
+
+  Description: Processes multiple strings and displays the raw PSObject output in a grid view window.
 
   .EXAMPLE
   New-MKPassword -PwdLength 18 | Get-MKPhonetic
-  Description: Call 'New-Password' function for a new randomized value which is read out loud back to user so it only exists in memory and is not recorded in bash history
+
+  Description: Generates a random password and returns its phonetic spelling, demonstrating pipeline input.
 
   .EXAMPLE
-  New-GUID | Get-MKPhonetic -Output audio
-  Description: Just another variation but this time using PowerShell built-in New-Guid cmdlet
+  New-GUID | Get-MKPhonetic -Output Audio
+
+  Description: Generates a GUID and reads its phonetic spelling aloud using text-to-speech.
   #>
   [CmdletBinding()]
   param (
@@ -205,8 +243,8 @@ function Get-MKPhonetic {
 
         # You can list available voices using: $synthesizer.GetInstalledVoices().VoiceInfo
         switch ($VoiceName) {
-          'David' { $synthesizer.SelectVoice("Microsoft David Desktop") }
-          'Zira' { $synthesizer.SelectVoice("Microsoft Zira Desktop") }
+          'David' { $synthesizer.SelectVoice('Microsoft David Desktop') }
+          'Zira' { $synthesizer.SelectVoice('Microsoft Zira Desktop') }
         }
 
         # The default rate is 0 (normal speed); positive values speed up, negative values slow down

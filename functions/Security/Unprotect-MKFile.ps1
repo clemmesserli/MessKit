@@ -1,10 +1,10 @@
 ﻿function Unprotect-MKFile {
   <#
   .SYNOPSIS
-  Decrypts a file that was encrypted using the Protect-MyFile function.
+  Decrypts a file that was encrypted using the Protect-MKFile function.
 
   .DESCRIPTION
-  The Unprotect-MKFile function decrypts files that were previously encrypted using the Protect-MyFile function.
+  The Unprotect-MKFile function decrypts files that were previously encrypted using the Protect-MKFile function.
   It supports both AES and RSA encryption methods, with options for different modes of operation and padding schemes.
 
   .PARAMETER Certificate
@@ -16,6 +16,9 @@
   .PARAMETER FilePath
   Specifies the file to be decrypted. This parameter accepts pipeline input.
 
+  .PARAMETER FileExtension
+  Specifies the extension to use for the decrypted output file. Valid values are "csv", "txt" (default), and "ps1".
+
   .PARAMETER Base64
   Switch to enable additional base64 decoding prior to decrypting the file.
 
@@ -25,26 +28,32 @@
   .EXAMPLE
   $cert = Get-Item Cert:\CurrentUser\My\833ED9148FD08F577D2AD743BAF71295AFEF345C
   Unprotect-MKFile -Certificate $cert -FilePath "C:\Certs\SecretFile.enc"
+
   Description: Decrypts the file "SecretFile.enc" using default values (AES256 + GCM)
 
   .EXAMPLE
   Unprotect-MKFile -Certificate $cert -FilePath "C:\Certs\SecretFile2.enc"
-  Description: Decrypts the file "SecretFile.enc" using custom values (AES128 + CBC) which are stored as part of the encryption process.
+
+  Description: Decrypts the file "SecretFile2.enc" using the encryption settings stored in the file.
 
   .EXAMPLE
   Unprotect-MKFile -Certificate $cert -FilePath "C:\Certs\SecretFile.enc" -Base64 -DeleteOriginal
+
   Description: This example decrypts a Base64 encoded file and deletes the original encrypted file after successful decryption.
 
   .EXAMPLE
   Get-ChildItem "C:\Certs\*.enc" | Unprotect-MKFile -Certificate $cert -Base64 -EncryptionMethod RSA
+
   Description: This example decrypts all .enc files in the specified directory using RSA decryption.
 
   .EXAMPLE
   Get-ChildItem "C:\Certs\*.enc" | Unprotect-MKFile -Base64 -Certificate $cert -DeleteOriginal
+
   Description: Decodes and Decrypts all files ending "*.enc" within specified directory before deleting the original input file.
 
   .EXAMPLE
   Unprotect-MKFile -FilePath "C:\Certs\MoreSecrets.enc" -Certificate $cert -FileExtension "csv"
+
   Description: Decrypts and sets file extension to .csv instead of .txt (default)
 
   .INPUTS
@@ -59,7 +68,6 @@
   The function requires appropriate permissions to read the encrypted file and write the decrypted file.
   Ensure that the correct certificate with the private key is used for decryption.
 
-  .NOTES
   Adapted from Ryan Ries - ryan@myotherpcisacloud.com
   #>
   [CmdletBinding(SupportsShouldProcess = $true)]

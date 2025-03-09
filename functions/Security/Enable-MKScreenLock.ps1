@@ -1,44 +1,70 @@
 function Enable-MKScreenLock {
   <#
   .SYNOPSIS
-  Enable a screen and keyboard* lock with various customization options like audio, image, message content, opacity, font color, etc.
+  Enable a screen and keyboard lock with various customization options like audio, image, message content, opacity, font color, etc.
 
   .DESCRIPTION
-  This function creates a custom screen lock overlay on all screens with specified settings like audio playback, image overlay, message content, font color, opacity, blur radius, and more.
-  It blocks user input and hides the cursor for the specified duration (Requires admin privileges).
+  This function creates a custom screen lock overlay on all screens with specified settings like audio playback,
+  image overlay, message content, font color, opacity, blur radius, and more.
+
+  It captures the current screen content, applies blur and overlay effects, then blocks user input and hides
+  the cursor for the specified duration. The function displays a countdown timer showing remaining lock time.
+
+  Note: Keyboard blocking requires administrator privileges. Without admin rights, only visual elements will be displayed.
 
   .PARAMETER AudioPath
-  Path to the audio file to be played during the screen lock.
+  Path to the audio file to be played during the screen lock. The audio will loop until the lock duration expires.
+  Must be a valid file path to an audio file supported by Windows Media Player.
 
   .PARAMETER AudioVolume
-  Volume level for the audio playback (default is 50).
+  Volume level for the audio playback, ranging from 0 (muted) to 100 (maximum).
+  Default is 50.
 
   .PARAMETER BlurRadius
-  Radius of the blur effect applied to the background image (default is 25).
+  Radius of the blur effect applied to the background image, ranging from 0 (no blur) to 100 (maximum blur).
+  Higher values create a more obscured background. Default is 25.
 
   .PARAMETER Duration
-  Duration for which the screen lock will be active (default is 20 minutes).
+  Duration for which the screen lock will be active, specified as a TimeSpan object.
+  Default is 20 minutes. For example: [TimeSpan]::FromMinutes(5) or "00:05:00".
 
   .PARAMETER Opacity
-  Opacity level of the screen lock overlay (default is 20).
+  Opacity level of the screen lock overlay, ranging from 0 (completely transparent) to 100 (completely opaque).
+  Controls the darkness of the overlay. Default is 20.
 
   .PARAMETER FontColor
-  Color of the font used for the message content (default is green).
+  Color of the font used for the message content and countdown timer.
+  Accepts predefined color names (black, blue, brown, cyan, green, gray, magenta, orange, purple, red, white, yellow).
+  Default is green (#00FF00).
 
   .PARAMETER ImagePath
-  Path to the custom image to be displayed as an overlay.
+  Path to a custom image to be displayed as an overlay on the locked screen.
+  Must be a valid file path to an image file.
 
   .PARAMETER ImageOpacity
-  Opacity level of the custom image overlay (default is 40).
+  Opacity level of the custom image overlay, ranging from 0 (completely transparent) to 100 (completely opaque).
+  Default is 40.
 
   .PARAMETER MessageContent
   Content of the message to be displayed on the screen lock overlay.
+  Can be provided via pipeline input.
 
   .EXAMPLE
   "Locked For Patching" | Enable-MKScreenLock -duration 00:00:15
 
+  Creates a screen lock with the message "Locked For Patching" displayed, lasting for 15 seconds.
+  The message content is provided through the pipeline.
+
   .EXAMPLE
   Enable-MKScreenLock -ImagePath "C:\temp\hacker-07.jpg" -MessageContent "Locked Screen" -ImageOpacity 60 -Opacity 60 -duration 00:00:15 -BlurRadius 60 -AudioPath "C:\temp\StrangerThings.mp3"
+
+  Creates a highly customized screen lock with:
+  - Custom background image with 60% opacity
+  - Message "Locked Screen" displayed
+  - Background overlay with 60% opacity (darker)
+  - Heavy blur effect (radius 60)
+  - Audio playback from the specified file
+  - Duration of 15 seconds
 
   .EXAMPLE
   $params = @{
@@ -50,6 +76,33 @@ function Enable-MKScreenLock {
   }
   Enable-MKScreenLock @params
 
+  Demonstrates using splatting to pass parameters to create a screen lock with:
+  - Custom audio at 25% volume
+  - Custom background image
+  - Custom message
+  - 6-minute duration
+
+  .INPUTS
+  [System.String]
+  You can pipe a string to this function as the MessageContent parameter.
+
+  .OUTPUTS
+  None. This function does not generate any output.
+
+  .NOTES
+  Requirements:
+  - Administrator privileges are required for keyboard blocking functionality
+  - Windows operating system with .NET Framework support
+  - Multiple monitors are supported (lock appears on all screens)
+
+  Security considerations:
+  - This function should be used responsibly
+  - While active, users cannot interact with their system
+  - An emergency override is not provided by default
+
+  Warning:
+  Some parameters are marked with DontShow attribute (AudioVolume, BlurRadius, ImageOpacity)
+  as they are considered advanced settings with reasonable defaults.
   #>
   [CmdletBinding()]
   param (
@@ -73,8 +126,8 @@ function Enable-MKScreenLock {
     [int]$Opacity = 20,
 
     [Parameter()]
-    [ValidateSet("black", "blue", "brown", "cyan", "green", "gray", "magenta", "orange", "purple", "red", "white", "yellow")]
-    [string]$FontColor = "#00FF00",
+    [ValidateSet('black', 'blue', 'brown', 'cyan', 'green', 'gray', 'magenta', 'orange', 'purple', 'red', 'white', 'yellow')]
+    [string]$FontColor = '#00FF00',
 
     [Parameter()]
     [ValidateScript({ Test-Path $_ -PathType Leaf })]
@@ -126,7 +179,7 @@ function Enable-MKScreenLock {
     }
 
     if (-not (Test-AdminPrivileges)) {
-      Write-Warning "Running without administrator privileges. Keyboard blocking will be disabled."
+      Write-Warning 'Running without administrator privileges. Keyboard blocking will be disabled.'
     }
   }
 
@@ -154,7 +207,7 @@ function Enable-MKScreenLock {
       try {
         $audioPlayer = New-Object -ComObject WMPlayer.OCX
         $audioPlayer.URL = $AudioPath
-        $audioPlayer.settings.setMode("loop", $true)
+        $audioPlayer.settings.setMode('loop', $true)
         $audioPlayer.settings.volume = $AudioVolume
       } catch {
         Write-Warning "Failed to initialize audio player: $_"
@@ -266,7 +319,7 @@ function Enable-MKScreenLock {
           # Apply the animation to the Opacity property of the textBlock
           $storyboard = New-Object Windows.Media.Animation.Storyboard
           [Windows.Media.Animation.Storyboard]::SetTarget($animation, $messageTextBlock)
-          [Windows.Media.Animation.Storyboard]::SetTargetProperty($animation, "(UIElement.Opacity)")
+          [Windows.Media.Animation.Storyboard]::SetTargetProperty($animation, '(UIElement.Opacity)')
           $storyboard.Children.Add($animation)
           $storyboard.Begin()
 

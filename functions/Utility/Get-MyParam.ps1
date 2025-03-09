@@ -5,8 +5,13 @@ function Get-MyParam {
 
   .DESCRIPTION
   The Get-MyParam function loads and parses a JSON file named "myparam.json" located in the "private"
-  subdirectory of the current module. It returns the parsed JSON data as a PSCustomObject. This function
-  is designed to be used within a PowerShell module to retrieve configuration or parameter data.
+  subdirectory of the current module. It returns the parsed JSON data as a PSCustomObject.
+
+  This function provides a centralized way to access configuration settings and default parameters
+  for other functions within the module, eliminating the need for hardcoded values.
+
+  .PARAMETER None
+  This cmdlet doesn't accept any parameters.
 
   .OUTPUTS
   [PSCustomObject]
@@ -16,7 +21,21 @@ function Get-MyParam {
   $params = Get-MyParam
   $params.'New-HotKey'
 
-  This example calls Get-MyParam and then accesses a property of the returned object.
+  Retrieves all parameters and accesses the New-HotKey configuration section.
+
+  .EXAMPLE
+  $keyBindings = (Get-MyParam).KeyBindings
+  foreach ($binding in $keyBindings) {
+    # Process each key binding
+  }
+
+  Retrieves the KeyBindings section and processes each item.
+
+  .NOTES
+  If the myparam.json file is not found or cannot be parsed, the function will throw an error.
+
+  The JSON file should be structured with top-level properties that correspond to function names
+  or configuration categories within the module.
   #>
   [CmdletBinding()]
   [OutputType([PSCustomObject])]
@@ -27,7 +46,7 @@ function Get-MyParam {
     # $filePath = Join-Path -Path $moduleBase -ChildPath "private\myparam.json"
 
     $moduleBase = $MyInvocation.MyCommand.Module.ModuleBase
-    $filePath = Join-Path -Path $ModuleBase -ChildPath "private/myparam.json"
+    $filePath = Join-Path -Path $ModuleBase -ChildPath 'private/myparam.json'
 
   }
 

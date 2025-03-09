@@ -32,17 +32,21 @@ function Get-MKStringHash {
   $uniqueId = (Get-MKStringHash $longText).Hash.Substring(0, 10)
   This creates a shorter, unique identifier for a longer piece of text.
 
-  # Without salt (same as before)
+  .EXAMPLE
   Get-MKStringHash -String "MyPassword123"
+  Generate a hash without using salt (default behavior).
 
-  # With salt
+  .EXAMPLE
   Get-MKStringHash -String "MyPassword123" -UseSalt
+  Generate a hash with a random salt for improved security.
 
-  # With salt and custom algorithm
+  .EXAMPLE
   Get-MKStringHash -String "MyPassword123" -UseSalt -Algorithm SHA512
+  Generate a hash with salt using the SHA512 algorithm for enhanced security.
 
-  # With salt and custom salt length
-  Get-MKStringHash -String "MyPassword123" -UseSalt -SaltLength 32 | format-list
+  .EXAMPLE
+  Get-MKStringHash -String "MyPassword123" -UseSalt -SaltLength 32 | Format-List
+  Generate a hash with a longer salt (32 bytes) and display all properties in list format.
   #>
   [CmdletBinding()]
   param (
@@ -68,7 +72,7 @@ function Get-MKStringHash {
       $rng.GetBytes($saltBytes)
       $rng.Dispose()
       [Convert]::ToBase64String($saltBytes)
-    } else { "" }
+    } else { '' }
 
     $saltedString = $String + $salt
     $bytes = [Text.Encoding]::UTF8.GetBytes($saltedString)

@@ -39,11 +39,11 @@ function Convert-MKCipher {
         if (Test-Path $_ -PathType Leaf) {
           $opensslVersion = & $_ version
           if ($opensslVersion -notlike 'OpenSSL 1.1.1*') {
-            throw "Invalid OpenSSL version. Please provide a path to OpenSSL version 1.1.1 or higher."
+            throw 'Invalid OpenSSL version. Please provide a path to OpenSSL version 1.1.1 or higher.'
           }
           return $true
         }
-        throw "The specified path does not exist or is not a file."
+        throw 'The specified path does not exist or is not a file.'
       })]
     #[string]$ExePath = (Get-MyParam).'Convert-MKCipher'.exePath
     [string]$ExePath = 'C:\Program Files\Git\mingw64\bin\openssl.exe'  # Default path if not provided

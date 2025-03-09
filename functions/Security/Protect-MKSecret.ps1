@@ -4,17 +4,20 @@ function Protect-MKSecret {
   Encrypts a secret using a key input in the form of a SecureString and saves it to a file.
 
   .DESCRIPTION
-  This function takes plain text content and a Key in the form of a SecureString which is then used to encrypt the content.
+  This function takes plain text content and a Passphrase in the form of a SecureString which is then used to encrypt the content.
   The output can then be saved to a file or displayed on screen.
 
   .PARAMETER Secret
   The secret text to encrypt.
 
-  .PARAMETER Key
-  The key value used for encryption, as a SecureString.
+  .PARAMETER Passphrase
+  The passphrase used for encryption, as a SecureString.
 
-  .PARAMETER OutputPath
-  The path where the encrypted secret will be saved. Defaults to a file named 'secret.txt' in the temp directory.
+  .PARAMETER FilePath
+  The path where the encrypted secret will be saved.
+
+  .PARAMETER DisplaySecret
+  Switch to display the encrypted secret on screen instead of saving to a file.
 
   .EXAMPLE
   $PassPhrase = Read-Host "Enter passphrase" -AsSecureString
@@ -74,6 +77,6 @@ function Protect-MKSecret {
     Set-Content -Path $FilePath -Value $encryptedSecret -NoNewline
     Write-Host "Secret encrypted and saved to: $FilePath"
   } else {
-    Write-Host "Use -DisplaySecret to display on screen or -FilePath to save to a file."
+    Write-Host 'Use -DisplaySecret to display on screen or -FilePath to save to a file.'
   }
 }
