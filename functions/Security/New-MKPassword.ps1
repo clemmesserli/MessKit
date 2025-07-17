@@ -62,7 +62,7 @@ function New-MKPassword {
   param (
     [Parameter(ValueFromPipelineByPropertyName)]
     [Alias('PasswordLength', 'Length')]
-    [ValidateRange(8, [int]::MaxValue)]
+    [ValidateRange(6, [int]::MaxValue)]
     [int]$PwdLength = (Get-Random -Minimum 24 -Maximum 32),
 
     [Parameter(ValueFromPipelineByPropertyName)]
@@ -131,7 +131,7 @@ function New-MKPassword {
       Write-Verbose 'No character types to distribute, using unspecified types or defaults'
       # Only include types that weren't explicitly set to 0
       $typesToDistribute = $charTypes | Where-Object {
-            (-not $_.IsSpecified) -or $_.Count.Value -gt 0
+        (-not $_.IsSpecified) -or $_.Count.Value -gt 0
       }
     }
 
